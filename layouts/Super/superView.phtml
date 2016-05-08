@@ -1,0 +1,159 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Boris
+ * Date: 14.01.2016
+ * Time: 0:11
+ */
+@include Config::LAYOUT_DIR.'userInfo'.Config::LAYOUT_TYPE;
+@include Config::LAYOUT_DIR.'loadingOverlay'.Config::LAYOUT_TYPE;
+?>
+<link rel="stylesheet" href="/styles/component.css">
+<?=popupboxHelper::Form("delBox")?>
+<ul id="menu" class="workSpaceMenu admin-menu">
+    <li class="cbp-vicurrent" data-action="Super/LoadNonAuth/0">
+        <a>Очікують <span id="uAwaitsc" class="badge"><?=$this->userAwaitsCount?></span></a>
+    </li>
+    <li data-action="Super/GetAllUsers/0">
+        <a>Користувачі<span id="uAllc" class="badge"><?=$this->userAllCount?></span></a>
+    </li>
+    <li><a id="oni"><span class="glyphicon glyphicon-cog"></span></a>
+        <ul class="sub-menu">
+            <li><a href="/">SQL</a></li>
+            <li><a href="/">Filter</a></li>
+            <li><a href="/">Magic</a></li>
+        </ul>
+    </li>
+</ul>
+<div id="mob" class="hamburger-button">
+    <div id="nav-icon3">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+<!--Start of modal Window-->
+<div class="modal fade" id="ModalEditUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content my-modal">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Редагування користувача</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                <form id="fEdit" action="super/EditUser/">
+                <p><input class="field" type="text" name="tLogin" id="tL" placeholder="  Ім'я користувача"
+                          value=""><span id="pLogin" class="text-danger"></span></p>
+                <p><input class="field pib" type="text" name="tPib" placeholder="  ПІБ"
+                          value=""></p>
+                <p><input class="field" type="text" id="tMail" name="tMail" placeholder="  електронна адреса"
+                          value=""><span id="pMail" class="text-danger"></span></p>
+                <div class="form-group">
+                    <label for="sTU">Територіальне управління:</label>
+                    <select class="form-control selectWidth" id="sTU" name="sTU" onchange="showInspections(this.value)">
+                        <option value="0">Оберіть ТУ</option>
+                        <?=htmlselectHelper::Form($this->territory)?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sIns">Інспекція:</label>
+                    <select class="form-control selectWidth" id="sIns" name="sIns">
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sJob">Посада:</label>
+                    <select class="form-control selectWidth" id="sJob" name="sJob">
+                        <?=htmlselectHelper::Form($this->jobs)?>
+                    </select>
+                </div>
+                </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="meuBcancel" class="but_cancel btn btn-danger" data-dismiss="modal">відмінити</button>
+                <button type="button" id="meuBcommit" class="but_ok btn btn-success">Зберегти зміни</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End of modal window-->
+<div id="fsc">
+<div class="aMain">
+    <div class="row">
+        <div class="hidden-xs col-sm-2 col-md-2 col-lg-1"></div>
+        <div class="col-xs-12 col-sm-10 col-md-10 col-lg-10">
+            <div class="panel panel-default" id="wrap">
+
+            </div>
+        </div>
+        <div class="hidden-xs hidden-md col-lg-1"></div>
+    </div>
+</div>
+</div>
+<script src="/js/jscripts.js"></script>
+<script>
+    var currentUser, currentRow;
+    var currentPage = 'super/LoadNonAuth/0';
+
+    $(document).ready(function(){
+        GetAnswer(currentPage, 'wrap');
+        /*setInterval(function(){
+            GetJsonResponse('/super/update', UpdateBadges);
+        }, 5000);*/
+    });
+    $("#wrap").on('click','.btn.btn-warning.btn-xs',function(){
+        currentUser = this;
+        currentRow = $(this).closest("tr");
+        GetJsonResponse('/super/editUser/'+this.id, ShowEdit);
+    });
+    $("#wrap").on('click','.btn-danger[data-action="delete"]', function(e){
+        e.preventDefault();
+        currentUser = this;
+        currentRow = $(this).closest("tr");
+        var message = $(currentRow).children('td[data-field="UserFullName"]').text();
+        $('.popupbox>div>p').text("Видалити "+message+" ?");
+        $('.popupbox').addClass('open');
+    });
+
+    $("#pub_ok").on("click", function(){
+        $.ajax({
+            dataType: "json",
+            url: '/super/delete/' + currentUser.id
+        }).done(function(data){
+            if(data['status'] == 1) {
+                $("#delBox").removeClass("open");
+                var tr = $(currentUser).closest('tr');
+                tr.fadeOut(600, function(){tr.remove();});
+                setTimeout(function(){
+                    GetAnswer(currentPage, 'wrap')
+                }, 1000);
+            }
+        }).fail(function() {
+            alert("error");
+        });
+    });
+    /*Only authorized users switch*/
+    $("#wrap").on('click', '.sw-toggle', SetParams);
+    $("#meuBcommit").on('click', function(){
+        $.ajax({
+            type: 'POST',
+            url: $('#fEdit').attr('action')+currentUser.id,
+            data: $('#fEdit').serialize(),
+            success: function(data) {
+                    if(data.status == 1) {
+                    $('#ModalEditUser').modal('hide');
+                    $(currentRow).fadeOut(400);
+                    $(currentRow).children('td[data-field="UserLogin"]').text(data.UserLogin);
+                    $(currentRow).children('td[data-field="UserFullName"]').text(data.UserFullName);
+                    $(currentRow).children('td[data-field="UserEmail"]').text(data.UserEmail);
+                    $(currentRow).children('td[data-field="region"]').text(data.RegionDescription);
+                    $(currentRow).children('td[data-field="inspection"]').text(data.InspectionDescription);
+                    $(currentRow).children('td[data-field="permission"]').text(data.permissionDescription);
+                    $(currentRow).fadeIn(600).fadeOut(300).fadeIn(500);
+                }
+            }
+        });
+    });
+</script>

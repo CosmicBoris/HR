@@ -1,0 +1,16 @@
+<div class="topRight">
+    <div class="btn-group">
+        <button id="name" type="button" class="btn btn-dark"><?=Auth::GetUserName()?></button>
+        <button type="button" class="btn btn-dark dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="#">Щось</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/logout">
+                    <span class="glyphicon glyphicon-off" aria-hidden="true"></span> Вийти</a>
+            </li>
+        </ul>
+    </div>
+</div>

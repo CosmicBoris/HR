@@ -1,0 +1,54 @@
+<div class="panel-heading">
+        <h3 class="panel-title pull-left"><?=$this->heading?></h3>
+        <div class="in_wrapper pull-right">
+            <span class="pull-left glyphicon glyphicon-search"></span>
+            <input id="searchbox" data-action="Super/LoadNonAuth/0" class="searchField" type="text" value="<?if(isset($this->search)) echo $this->search?>">
+            <label></label>
+        </div>
+    <div class="clearfix"></div>
+</div>
+    <div id="conTable" class="table-responsive">
+        <table class="table table-bordered table-striped table-hover table-condensed">
+    <thead>
+        <tr>
+            <th class="text-center" style="width: 40px">#ID</th>
+            <th class="text-center"><span>Логін</span></th>
+            <th class="text-center"><span>П.І.Б</span></th>
+            <th class="text-center"><span>E-Mail</span></th>
+            <th class="text-center"><span>ТУ</span></th>
+            <th class="text-center"><span>Інспекція</span></th>
+            <th class="text-center"><span>Посада</span></th>
+            <th colspan="2"></th>
+        </tr>
+    </thead>
+<?
+        $int=0;
+        foreach ($this->users as  $user):
+            if(++$int % 2 === 0){
+                echo '<tr class="active">';
+            }
+            else{
+                echo '<tr>';
+            }
+            foreach ($user as $key => $value):
+                if($value === NULL || $key == 'permissionID')
+                    continue;
+?>
+                <td><?=$value?></td>
+<?
+            endforeach;
+?>
+            <td class="text-center" style="width: 35px">
+                <button class = "btn btn-success btn-xs" id="<?=$user->UserID?>" onClick="Accept(this)">
+                    <span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
+                </button>
+            </td>
+            <td style="width: 35px"><button class = "btn btn-danger btn-xs" id="<?=$user->UserID?>" data-action="reject" onClick="Reject(this)">
+                    <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button></td>
+<?php
+        endforeach;
+?>
+        </table>
+    </div>
+<?= paginationHelper::Form($this->nUserCount, "super/LoadNonAuth");?>
