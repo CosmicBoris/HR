@@ -1,4 +1,4 @@
-<h2 class="info">Candidates</h2>
+<h2 class="info">Vacancies<span class="badge badge-primary">0</span></h2>
 <div id="somedialog" class="paper_dialog">
     <div id="addCandidate" class="paper">
         <div class="box clearfix">
@@ -8,7 +8,7 @@
             <hr>
             <div class="form-group text-center">
                 <form id="form_new_candidate" action="/" method="POST">
-                    <span id="warnings" class="text-danger"></span>
+                    <span id="pLogin" class="text-danger"></span>
                     <p><input class="field" type="text" name="name" placeholder="Name"></p>
 
                     <p><input class="field" type="text" name="surname" placeholder="Surname"></p>
@@ -63,15 +63,15 @@
                 <table class="table table-bordered table-striped table-hover table-condensed">
                     <thead>
                     <tr>
-                        <th class="text-center"><span>Name</span></th>
-                        <th class="text-center"><span>e-mail</span></th>
-                        <th class="text-center"><span>phone</span></th>
-                        <th class="text-center"><span>status</span></th>
+                        <th class="text-center"><span>Title</span></th>
+                        <th class="text-center"><span>Description</span></th>
+                        <th class="text-center"><span>Date added</span></th>
+                        <th class="text-center"><span>Assigned</span></th>
                         <th colspan="2"></th>
                     </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                    <tr>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -86,7 +86,7 @@
                                 <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
                             </button>
                         </td>
-                        </tr>
+                    </tr>
                     </tbody>
                 </table>
             </div>

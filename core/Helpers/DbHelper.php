@@ -104,16 +104,26 @@ final class DbHelper {
 
 		return $this;
 	}
-	public function insert($table, $fields)
+	public function insert($table, $obj)
 	{
-		$this->_sql = 'INSERT INTO '.$this->GetSafeStr($table);
-		$this->_sql .='('.$this->GetSafeStr(array_keys($fields)).')';
-		$this->_sql .= ' VALUES('.$this->GetSafeStr(array_values($fields), true).')';
+        $this->_sql = 'INSERT INTO '.$this->GetSafeStr($table);
+        if(is_object($obj)) {
+            foreach ($obj as $key => $value ) {
+                if(empty($value)) unset($obj->$key);
+            }
+
+            $this->_sql .= '('.$this->GetSafeStr(array_keys( get_object_vars($obj))).')'
+                .' VALUES('.$this->GetSafeStr(array_values(get_object_vars($obj)), true).')';
+            return $this;
+        }
+
+		$this->_sql .= '('.$this->GetSafeStr(array_keys($obj)).')'
+				.' VALUES('.$this->GetSafeStr(array_values($obj), true).')';
 		return $this;
 	}
 	public function innerJoin($table, $fields, $tableToJoin = false)
 	{
-		if(is_array($table)){
+		if(is_array($table)){ // example ['user'=>'u'] user AS u
 			$tableName = $this->GetSafeStr(current($table));
 			$this->_sql .= ' INNER JOIN '.$this->GetSafeStr(key($table)).' AS '
 				.$tableName.' ON ';
@@ -124,14 +134,12 @@ final class DbHelper {
 
 		foreach($fields as $key => $value)
 		{
-			if(!$value){
-				continue;
-			}
-			if($tableToJoin){
+			if(!$value) continue;
+			if($tableToJoin)
 				$this->_sql .= $this->GetSafeStr($tableToJoin).'.'.$this->GetSafeStr($key);
-			}else{
+			else
 				$this->_sql .= $this->_table.'.'.$this->GetSafeStr($key);
-			}
+
 			$this->_sql .= "=";
 			$this->_sql .= $tableName.'.'.$this->GetSafeStr($value);
 		}
@@ -534,35 +542,38 @@ final class DbHelper {
 		}
 		return $users;
 	}
-	function GetUser($uid)
+
+	function GetCandidates()
 	{
-		$sql = 'SELECT `u`.`UserID`,`UserLogin`,`UserFullName`,`UserEmail`,`r`.`RegionID`,'
-			.'`RegionDescription`,`i`.`InspectionID`,`InspectionDescription`, `permissionDescription`,`p`.`permissionID`'
-			.'FROM `user` AS `u` INNER JOIN `userpermission` ON `u`.`UserID`=`userpermission`.`UserID`'
-			.'INNER JOIN `permission` AS `p` ON `userpermission`.`permissionID`=`p`.`permissionID`'
-			.'INNER JOIN `inspection` AS `i` ON `u`.`InspectionID`=`i`.`InspectionID`'
-			.'INNER JOIN `region` AS `r` ON `i`.`RegionID`=`r`.`RegionID`'
-			.'WHERE `u`.`UserID`= '.$uid;
-		if($result = $this->_db->query($sql))
-		{
-			if($obj = $result->fetch_assoc())
-			{
-				$user = new User($obj);
-				$user->RegionDescription = $obj['RegionDescription'];
-				$user->InspectionDescription = $obj['InspectionDescription'];
-				$user->permissionDescription = $obj['permissionDescription'];
-				return $user;
+		$candidates = array();
+		$candidate = new Candidate();
+
+		$result = $this->select('candidates', array_keys(get_object_vars($candidate)))
+			->innerJoin(['user_candidates'=>'uc'], ['id'=>'candidate_id'])
+			->where(array('uc.user_id'=> Auth::GetUserID()))->RunQuery();
+
+		if(empty($this->_errors)) {
+			while ($obj = $result-> fetch_assoc()) {
+				$candidate = new Candidate($obj);
+				$candidates[] = $candidate;
 			}
 		}
-		return false;
+		return $candidate;
 	}
-	function Athorize($uid)
+	function GetCandidate($id)
 	{
-		$sql = "DELETE FROM `nonauthorized` WHERE `UserID`='$uid'";
-		if ($this->_db->query($sql) === TRUE){
-    		return true;
-        }
-        return false;
+		$candidate = new Candidate();
+
+		$result = $this->select('candidates', array_keys(get_object_vars($candidate)))
+			->innerJoin(['user_candidates'=>'uc'], ['id'=>'candidate_id'])
+			->where(array('uc.candidate_id'=>$id, 'uc.user_id'=> Auth::GetUserID()), '=', 'AND')->RunQuery();
+
+		if(empty($this->_errors)) {
+			if($obj = $result->fetch_assoc()) {
+				$candidate->Init($obj);
+			}
+		}
+		return $candidate;
 	}
 
 	function GetEntitysInfo($from, $param = false)
@@ -790,16 +801,13 @@ final class DbHelper {
 		return $this->_errors;
 	}
 	public function __destruct() {
-		if(!empty($this->_errors)){
+		if(!empty($this->_errors)) {
 			$this->_errors['date'] = date("Y-m-d H:i:s");
-			if(file_exists(Config::LOG_DIR.Config::ERROR_LOG)){
-				file_put_contents(Config::LOG_DIR.Config::ERROR_LOG,
-					serialize($this->_errors), FILE_APPEND |
+
+				file_put_contents(Config::ERROR_LOG,
+					print_r($this->_errors, TRUE), FILE_APPEND |
 					LOCK_EX);
-			} else {
-				file_put_contents(Config::LOG_DIR.Config::ERROR_LOG,
-					serialize($this->_errors), LOCK_EX);
-			}
+
 		}
 		$this->_db->close();
    }

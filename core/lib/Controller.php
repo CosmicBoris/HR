@@ -18,7 +18,7 @@ abstract class Controller
     public function show404() // if user require non-existent action
     {
         $this->_view->SetTitle('Page not found');
-        $this->_view->partialRender(false, 'nopage');
+        $this->_view->render('nopage');
     }
 
     /**Check if request was send using POST method

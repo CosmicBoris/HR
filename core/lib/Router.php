@@ -30,9 +30,13 @@ class Router
             $action_name = (empty(self::$segments[1])) ? 'actionIndex' : 'action'.ucfirst(self::$segments[1]);
 			if(method_exists($controller, $action_name)) {
 				$controller->$action_name();
-    		}
+    		} else {
+                $controller_name = Config::DEFAULT_CONTROLLER.'Controller';
+                $controller = new $controller_name();
+                $controller->show404();
+            }
 		} else {
-            $controller_name = Config::DEFAULT_CONTROLLER;
+            $controller_name = Config::DEFAULT_CONTROLLER.'Controller';
             $controller = new $controller_name();
 			$controller->show404();
 		}
@@ -58,7 +62,7 @@ class Router
      */
     public static function getActionName($mod) {
         $name = "";
-        if(isset(self::$segments[1]))
+        if(!empty(self::$segments[1]))
             $name = ucfirst(self::$segments[1]);
         else
             $name = 'Index';

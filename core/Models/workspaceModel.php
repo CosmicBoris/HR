@@ -22,6 +22,7 @@ class WorkspaceModel extends Model
             return $entitys;
         }
     }
+    
     public function GetMYEntitysCount($param = false)
     {
         if(isset($param)){
@@ -35,41 +36,13 @@ class WorkspaceModel extends Model
             ->where(array('UserId'=>Auth::GetUserID()))
             ->RunQuery()->num_rows;
     }
-    public function AddOrUpdateEntity(&$arg)
-    {
-        $data = array();
-        $validator = Validator::GetInstance();
-        foreach($_POST as $key => $item){
-            $data[$key] = $validator->Validate($item)->CheckForEmpty()->GetAllFields();
-        }
-        if(!$validator->IsError())
-        {
-            $nId = $this->dbLink->select('entity', 'Entity_Id')
-                ->where(['Entity_EDRPOU'=>$data['Entity']['Entity_EDRPOU']])
-                ->RunQuery()->fetch_assoc();
-            if($nId !== false && $nId > 0){
-
-                if($this->dbLink->UpdateEntity($nId, $data, $arg) !== false){
-                    $arg['status'] = 1;
-                    return true;
-                }
-            }else{
-                $id = $this->dbLink->AddEntity($data, $arg);
-                if($id !== false){
-                    $arg['status'] = 1;
-                    return true;
-                }
-            }
-            $arg[] = $this->dbLink->getErrors();
-            $arg['status'] = "error";
-            return false;
-        } else {
-            $arg = $validator->getErrors();
-             return false;
-        }
+    
+    public function GetCandidates($id = false) {
+        if($id) return $this->dbLink->GetCandidate($id);
+        return $this->dbLink->GetCandidates();
     }
-    public function GetEntityFullInfo($id)
-    {
-        return $this->dbLink->GetEntityInfoFull($id);
+    
+    public function AddVacancy($vacancy){
+        return $this->dbLink->insert('vacancies', $vacancy)->RunQuery();
     }
 }

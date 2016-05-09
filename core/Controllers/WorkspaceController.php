@@ -51,9 +51,24 @@ class WorkspaceController extends Controller
     }
     public function actionVacancies()
     {
-        //ob_start()
-        //Response::ReturnJson();
-        $this->_view->partialRender('vacancies');
+        if($this->isPost()){
+            
+            $response = array();
+            $vacancy = new Vacancy($_POST);
+            $vacancy->user_id = Auth::GetUserID();
+            if($this->_model->AddVacancy($vacancy)){
+                $response['status'] = 1;
+            }
+            Response::ReturnJson($response);
+        } else {
+            $this->_view->users = $this->_model->GetCandidates();
+            $this->_view->SetTitle('Vacancies');
+            if($this->isAjax())
+                $this->_view->partialRender();
+            else {
+                $this->_view->render();
+            }
+        }
     }
     public function actionJournal()
     {

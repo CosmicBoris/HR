@@ -12,9 +12,13 @@ class Response
     const STATUS_NOT_MODIFIED = 304;
     const STATUS_FORBIDDEN = 403;
 
-    public static function ReturnJson()
+    /**
+     * @param array|bool $args
+     */
+    public static function ReturnJson($args = false)
     {
         header('Content-type: application/json');
+        if($args) echo json_encode($args);
     }
     public static function ReturnCode($code)
     {

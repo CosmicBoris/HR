@@ -1,11 +1,23 @@
 <?php
-class User extends Init implements IteratorAggregate
+
+/**
+ * Created by PhpStorm.
+ * User: boris
+ * Date: 08.05.2016
+ * Time: 18:06
+ */
+class Candidate extends Init implements IteratorAggregate
 {
     public $id;
     public $name;
     public $surname;
+    public $sex;
+    public $age;
+    public $profile;
     public $email;
-    public $password;
+    public $phone;
+    public $photo;
+    public $skills;
 
     public function __construct($obj = false)
     {
@@ -17,4 +29,4 @@ class User extends Init implements IteratorAggregate
     {
         return new ArrayIterator($this);
     }
-}    
+}
