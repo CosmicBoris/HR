@@ -9,8 +9,7 @@
 class Candidate extends Init implements IteratorAggregate
 {
     public $id;
-    public $name;
-    public $surname;
+    public $fullname;
     public $sex;
     public $age;
     public $profile;

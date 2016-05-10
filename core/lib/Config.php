@@ -6,7 +6,7 @@ class Config
     const JAVAScripts_DIR = "/js/";
     const LAYOUT_TYPE = '.phtml';
     const MAIN_LAYOUT = 'index';
-    const LOG_DIR = 'logs/';
+    const LOG_DIR = '/logs/';
     const ERROR_LOG = 'errorsLog.txt';
     const SECRET = '2016DB'; // add this to user password
     const DB_PASS = "ro8t1ng";

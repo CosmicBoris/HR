@@ -188,16 +188,27 @@ final class DbHelper {
 		}
 		return $this;
 	}
+    public function limit($from, $count) {
+        $this->_sql .= " LIMIT $from,$count ";
+        return $this;
+    }
+
 	/**
 	 * @return bool | mysqli_result
 	 */
 	public function RunQuery()
 	{
+        $file = fopen($_SERVER['DOCUMENT_ROOT'].Config::LOG_DIR.'SQL_Query_log.txt', 'ab');
+        if ($file) {
+            $str = "\r\nData: ".date("Y-m-d H:i:s")."\r\nSQL: \r\n".$this->_sql."\r\n";
+            fwrite($file, $str);
+        }
+
 		$result = $this->_db->query($this->_sql);
 		$this->_sql = '';
 		if($result === false) $this->setErrors();
 		
-		return $result;
+		return $result; 
 	}
 	public function showSql(){
 		return $this->_sql;
@@ -221,7 +232,7 @@ final class DbHelper {
 		$result = $this->_db->query($this->_sql);
 		if ($result && !$this->_db->error)
 		{
-			if($result->num_rows > 1){
+			if($result->num_rows > 1) {
 				$output = array();
 				while ($obj = $result-> fetch_assoc()) {
 					$output[]= $obj;
@@ -558,7 +569,7 @@ final class DbHelper {
 				$candidates[] = $candidate;
 			}
 		}
-		return $candidate;
+		return $candidates;
 	}
 	function GetCandidate($id)
 	{
@@ -804,10 +815,8 @@ final class DbHelper {
 		if(!empty($this->_errors)) {
 			$this->_errors['date'] = date("Y-m-d H:i:s");
 
-				file_put_contents(Config::ERROR_LOG,
-					print_r($this->_errors, TRUE), FILE_APPEND |
-					LOCK_EX);
-
+            file_put_contents($_SERVER['DOCUMENT_ROOT'].Config::LOG_DIR.Config::ERROR_LOG,
+                print_r($this->_errors, TRUE), FILE_APPEND | LOCK_EX);
 		}
 		$this->_db->close();
    }

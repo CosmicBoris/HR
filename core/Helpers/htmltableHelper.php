@@ -71,7 +71,7 @@ class htmltableHelper
     }
     public function Body($params)
     {
-        $this->tbody = "";
+        $this->tbody = '';
 
         foreach ($params as $param) {
             if (is_array($param))
@@ -101,6 +101,19 @@ class htmltableHelper
         }
         return $this;
     }
+    public function BodyFromObj($objects, $orderOfFields)
+    {
+        $this->tbody = '';
+
+        foreach ($objects as $object) {
+            $this->tbody .= '<tr>';
+            foreach($orderOfFields as $name){
+                $this->tbody .= '<td>'.$object->$name.'</td>';
+            }
+            $this->tbody .= '</tr>';
+        }
+        return $this;
+    }
 
     /**
      * Form and return table;
@@ -116,7 +129,7 @@ class htmltableHelper
     /**
      * @return mixed
      */
-    public function getTbody()
+    public function getTableBody()
     {
         return $this->tbody;
     }

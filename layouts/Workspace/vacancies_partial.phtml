@@ -1,45 +1,24 @@
-<h2 class="info">Vacancies<span class="badge badge-primary">0</span></h2>
-<div id="somedialog" class="paper_dialog">
+<h2 class="info">Vacancies <span class="badge badge-primary"><?=$this->vCount;?></span></h2>
+
+<div id="new_vac" class="paper_dialog">
+
     <div id="addCandidate" class="paper">
         <div class="box clearfix">
-            <h3>new candidate</h3>
-            <input type="button"  class="btn-add-trigger" value="ADD">
+            <h3>new vacancy</h3>
+            <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
             <div class="clearfix"></div>
             <hr>
             <div class="form-group text-center">
-                <form id="form_new_candidate" action="/" method="POST">
-                    <span id="pLogin" class="text-danger"></span>
-                    <p><input class="field" type="text" name="name" placeholder="Name"></p>
+                <form id="form_new_vacancy" action="/workspace/Vacancies" method="POST">
+                    <span id="warnings" class="text-danger"></span>
+                    <p><input class="field" type="text" name="title" placeholder="Title"></p>
 
-                    <p><input class="field" type="text" name="surname" placeholder="Surname"></p>
+                    <p><input class="field" type="text" name="description" placeholder="Description"></p>
 
-                    <p><input class="field" type="text" name="phone" placeholder="10 digit phone number"></p>
-
-                    <p><input class="field" type="text" name="email" placeholder="E-mail"></p>
-
-                    <p><input class="field" type="text" name="profile" placeholder="Link to summary"></p>
-
-                    <div class="form_input_size clearfix">
-                        <h4>Sex:</h4>
-
-                        <ul class="cd-form-list">
-                            <li>
-                                <input type="radio" name="sex" id="cd-radio-1" value="1" checked>
-                                <label for="cd-radio-1">male</label>
-                            </li>
-
-                            <li>
-                                <input type="radio" name="sex" id="cd-radio-2" value="2">
-                                <label for="cd-radio-2">female</label>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <p><input class="field" type="number" min="14" max="90" name="age" placeholder="Age"></p>
-
-                    <label for="vacancy_id">Assign vacancy:</label>
-                    <select class="form-control _select" name="vacancy_id">
+                    <label for="vacancy_id">Assign candidate:</label>
+                    <select class="form-control _select" name="candidate_id">
                         <option value="0">None</option>
+                        <?=htmlselectHelper::Form($this->users, 'id', 'fullname')?>
                     </select>
                 </form>
             </div>
@@ -48,10 +27,11 @@
 </div>
 
 <div class="row">
+
     <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title pull-left">Stored files:</h3>
+                <button id="plus_one" class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
                 <div class="pull-right">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                     <input id="searchbox" class="" type="text" placeholder="SEARCH">
@@ -60,9 +40,10 @@
                 <div class="clearfix"></div>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover table-condensed">
+                <table id="fvacancies" class="table table-bordered table-striped table-hover table-condensed">
                     <thead>
                     <tr>
+                        <th class="text-center"><span>№</span></th>
                         <th class="text-center"><span>Title</span></th>
                         <th class="text-center"><span>Description</span></th>
                         <th class="text-center"><span>Date added</span></th>
@@ -71,36 +52,92 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <button class = "btn btn-sm btn_c" data-action="info" data-pid="">
-                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                            </button>
-                        </td>
-                        <td>
-                            <button class = "btn btn-sm btn_c" data-action="delete" data-pid="">
-                                <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-                            </button>
-                        </td>
-                    </tr>
+                    <?php
+                    foreach ($this->vacancies as  $vacancy):
+                        ?>
+                        <tr>
+                            <td><?=$vacancy->N?></td>
+                            <td><?=$vacancy->title?></td>
+                            <td><?=$vacancy->description?></td>
+                            <td><?=$vacancy->date_added?></td>
+                            <td><?=$vacancy->assigned?></td>
+                            <td>
+                                <button id="<?=$vacancy->id?>" class="btn btn-sm btn_c" data-action="info">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                </button>
+                            </td>
+                            <td>
+                                <button id="<?=$vacancy->id?>" class="btn btn-sm btn_c" data-action="delete">
+                                    <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php
+                    endforeach;
+                    ?>
                     </tbody>
                 </table>
             </div>
+            <?=popupboxHelper::Form("delBox")?>
+            <?= paginationHelper::Form($this->vCount, "/workspace/Vacancies", $this->page);?>
         </div>
     </div>
 </div>
 
 <script>
-    $(".btn").on('click', function(){
-        $("#somedialog").addClass('open');
+    $("#plus_one").on('click', function(){
+        $("#new_vac").addClass('open');
     });
-    $("#somedialog").on('click', function(e){
+    $("#new_vac").on('click', function(e){
         if(e.target == this){
             $(this).removeClass('open');
         }
-    })
+    });
+    $("#btnAdd").on('click', function(){
+        $.ajax(
+            {
+                type: 'POST',
+                url: $('#form_new_vacancy').attr('action'),
+                data: $('#form_new_vacancy').serialize()
+            })
+            .done( function(data ){
+                if(data['status'] == 1) {
+                    $("#new_vac").removeClass('open');
+
+                    $('.badge.badge-primary').text(data.vCount);
+                    $(".table>tbody").html(data.table);
+
+                    $(".pull-right>.pagination").detach();
+                    $(".table-responsive").after(data.pagination);
+                }
+            })
+            .fail( function() {
+                alert("error");
+            });
+    });
+    $("#fvacancies").on('click','.btn[data-action="delete"]', function(e){
+        e.preventDefault();
+        var currentRow = $(this).closest("tr");
+        var message = $(currentRow).children('td:nth-child(2)').text();
+        $('.popupbox>div>p').text("Delete "+message+" ?");
+        $('.popupbox').addClass('open');
+    });
+
+    $("#pub_ok").on("click", function(){
+        $.ajax({
+            dataType: "json",
+            url: '/super/delete/' + currentUser.id
+        }).done(function(data){
+            if(data['status'] == 1) {
+                $("#delBox").removeClass("open");
+                var tr = $(currentUser).closest('tr');
+                tr.fadeOut(600, function(){tr.remove();});
+                setTimeout(function(){
+                    GetAnswer(currentPage, 'wrap')
+                }, 1000);
+            }
+        }).fail(function() {
+            alert("error");
+        });
+    });
 </script>

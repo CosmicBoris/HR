@@ -41,7 +41,7 @@ class SuperController extends Controller
                 $user = (array)$user;
             }
             $ht = new htmltableHelper();
-            $resp['table'] = $ht->Body($users)->getTbody();
+            $resp['table'] = $ht->Body($users)->getTableBody();
             $resp['pagination'] = paginationHelper::Form(
                 $this->_model->GetNonAthorizedCount($csearch), "super/LoadNonAuth");
             echo json_encode($resp);
@@ -55,7 +55,7 @@ class SuperController extends Controller
 
     public function actionGetAllUsers()
     {
-        if($csearch = $_GET['search']){
+        if($csearch = $_GET['search']) {
             Response::ReturnJson();
             $resp = array('heading' => 'Результати пошуку: '.$csearch);
             $par = array();
@@ -74,7 +74,7 @@ class SuperController extends Controller
                 $user = (array)$user;
             }
             $ht = new htmltableHelper();
-            $resp['table'] = $ht->Body($users)->getTbody();
+            $resp['table'] = $ht->Body($users)->getTableBody();
             $resp['pagination'] = paginationHelper::Form(
                 $this->_model->GetUsersCount($csearch), "super/GetAllUsers");
             echo json_encode($resp);

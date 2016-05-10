@@ -12,6 +12,24 @@ $(document).ready(function()
         } else if(event.which=='27') { // esc keyboard button
             
         } else if(event.which=='13'){}
+    }).on('click','.pageAct', function(e){
+        if($("#searchbox").length && $("#searchbox").val().length > 2) {
+            JsonSearchResult(this);
+        } else {
+            currentPage = this.getAttribute('data-action');
+            GetAnswer(currentPage, 'LContainer');
+        }
+
+    }).on('click',".popupbox", function(event) {    //send login | close popup
+        if( $(event.target).is('.popupbox-close') || $(event.target).is('.popupbox'))
+        {
+            event.preventDefault();
+            if($(event.target).attr('data-attr') != 'glued') {
+                $(this).removeClass('open');
+            }
+        } else if( $(event.target).is('#btnLogin')) {
+            Login();
+        }
     });
 
     $("#btn_menu_trigger").on('click', function() {
@@ -22,18 +40,7 @@ $(document).ready(function()
     $( ".topLeftCenter" ).on( "mouseup", MouseMove).on( "mousedown", function(event){
         mouseStartX = event.clientX;
     });
-    //send login | close popup
-    $(".popupbox").on('click', function(event) {
-        if( $(event.target).is('.popupbox-close') || $(event.target).is('.popupbox'))
-        {
-            event.preventDefault();
-            if($(event.target).attr('data-attr') != 'glued') {
-                $(this).removeClass('open');
-            }
-        } else if( $(event.target).is('#btnLogin') ) {
-            Login();
-        }
-    });
+
     $("#menu").on('click', function(event) {
         if(event.target != this) {
             if( $(event.target).is('#logOut')) {
@@ -118,7 +125,8 @@ function GetAnswer(url, callBackElementId)
         }
     };
     loadingScreen(true);
-    xmlhttp.open("GET", url+'?ajax', true);
+
+    xmlhttp.open("GET", (url.contains('?')) ? url+'&ajax' : url+'?ajax', true);
     try {
         xmlhttp.send();
 
@@ -131,6 +139,36 @@ function GetAnswer(url, callBackElementId)
     }
 }
 
+function PostForm(id_str, callbackFunction)
+{
+    var form = document.getElementById(id_str);
+    var req;
+    if (window.XMLHttpRequest) {
+        req = new XMLHttpRequest();                      //  новые браузеры
+    } else {
+        req = new ActiveXObject("Microsoft.XMLHTTP");    //  древние IE 5...
+    }
+
+    req.responseType = 'JSON';
+    req.timeout = 5000;
+    req.addEventListener('load', function(evt){
+        if(this.status == 200){
+            callbackFunction(JSON.parse(req.response));
+        }
+    });
+    req.addEventListener('error', GetJsonErrorHandle);
+    req.addEventListener('loadstart', function (evt){
+        loadingScreen(true);
+    });
+
+    req.onreadystatechange = function(){
+        if (req.readyState == 4)
+            loadingScreen(false);
+    };
+    req.open("POST", form.getAttribute('action'), true);
+    req.send( serialize(form) );
+}
+
 function GetJsonResponse(address, callbackFunction)
 {
     var req;
@@ -139,24 +177,25 @@ function GetJsonResponse(address, callbackFunction)
     } else {
         req = new ActiveXObject("Microsoft.XMLHTTP");    //  древние IE 5...
     }
-    req.onreadystatechange = function()
-    {
-        if (req.readyState == 4 && req.status == 200) {
-            loadingScreen(false);
-            callbackFunction(JSON.parse(req.responseText));
-        } else if (req.status == 404) {
-            loadingScreen(false);
-            callbackFunction(false);
+
+    req.responseType = 'JSON';
+    req.timeout = 5000;
+    req.addEventListener('load', function(evt){
+        if(this.status == 200){
+            callbackFunction(JSON.parse(req.response));
         }
+    });
+    req.addEventListener('error', GetJsonErrorHandle);
+    req.addEventListener('loadstart', function (evt){
+        loadingScreen(true);
+    });
+
+    req.onreadystatechange = function(){
+        if (req.readyState == 4)
+            loadingScreen(false);
     };
-    req.onerror = GetJsonErrorHandle;
     req.open("GET", address, true);
-    loadingScreen(true);
-    try {
-        req.send();
-    } catch (error){
-        GetJsonErrorHandle(error);
-    }
+    req.send();
 }
 
 function GetJsonErrorHandle(obj)

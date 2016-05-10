@@ -13,8 +13,8 @@ class popupboxHelper
 	static function Form($id, $title = false, $buttons = false)
 	{
 		if(!$buttons){
-			$buttons[0] = "Так";
-			$buttons[1] = "Ні";
+			$buttons[0] = "YES";
+			$buttons[1] = "NO";
 		}
 		self::$output = <<< TX
 		<div class="popupbox" id="$id" role="alert">

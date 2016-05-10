@@ -51,17 +51,49 @@ class WorkspaceController extends Controller
     }
     public function actionVacancies()
     {
-        if($this->isPost()){
-            
+        if($this->isPost()) {
             $response = array();
             $vacancy = new Vacancy($_POST);
             $vacancy->user_id = Auth::GetUserID();
-            if($this->_model->AddVacancy($vacancy)){
+            if($this->_model->AddVacancy($vacancy, $_POST['candidate_id'])) {
                 $response['status'] = 1;
+            } else {
+                $response['error'] = $this->_model->getDBError();
             }
+            
+            $vacancies = $this->_model->getVacancies(0);
+
+            foreach( $vacancies as $vac ){
+                $vac->btnInfo = htmlbuttonHelper::Form(
+                    ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
+                    '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
+                );
+                $vac->btnRemove = htmlbuttonHelper::Form(
+                    ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
+                    '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
+                );
+                unset($vac->id);
+                unset($vac->user_id);
+                unset($vac->state);
+            }
+
+            $ht = new htmltableHelper();
+            $response['table'] = $ht->BodyFromObj($vacancies,
+                ['title', 'description', 'date_added', 'assigned','btnInfo','btnRemove']
+            )->getTableBody();
+
+            $response['vCount'] = $this->_model->vacanciesCount();
+            $response['pagination'] = paginationHelper::Form(
+                $response['vCount'], "/workspace/Vacancies"
+            );
+
             Response::ReturnJson($response);
         } else {
+            $this->_view->page = $_GET['page'];
             $this->_view->users = $this->_model->GetCandidates();
+            $this->_view->vCount = $this->_model->vacanciesCount();
+            $this->_view->vacancies = $this->_model->getVacancies($this->_view->page);
+            
             $this->_view->SetTitle('Vacancies');
             if($this->isAjax())
                 $this->_view->partialRender();

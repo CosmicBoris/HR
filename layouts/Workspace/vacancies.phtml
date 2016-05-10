@@ -1,17 +1,17 @@
 <?include_once Config::LAYOUT_DIR."userInfo".Config::LAYOUT_TYPE;?>
 <?=Menu::getMenu()?>
+
 <div class="wrap">
     <div class="innerWrap">
         <div class="slide_side">
             <div id="LContainer" class="container-fluid">
-
-                <h2 class="info">Vacancies <span class="badge badge-primary">0</span></h2>
+                <h2 class="info">Vacancies <span class="badge badge-primary"><?=$this->vCount;?></span></h2>
 
                 <div id="new_vac" class="paper_dialog">
                     <div id="addCandidate" class="paper">
                         <div class="box clearfix">
                             <h3>new vacancy</h3>
-                            <input type="button"  class="btn-add-trigger" value="ADD">
+                            <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
                             <div class="clearfix"></div>
                             <hr>
                             <div class="form-group text-center">
@@ -22,9 +22,9 @@
                                     <p><input class="field" type="text" name="description" placeholder="Description"></p>
 
                                     <label for="vacancy_id">Assign candidate:</label>
-                                    <select class="form-control _select" name="user_id">
+                                    <select class="form-control _select" name="candidate_id">
                                         <option value="0">None</option>
-                                        <?=htmlselectHelper::Form($this->users)?>
+                                        <?=htmlselectHelper::Form($this->users, 'id', 'fullname')?>
                                     </select>
                                 </form>
                             </div>
@@ -48,6 +48,7 @@
                                 <table id="fvacancies" class="table table-bordered table-striped table-hover table-condensed">
                                     <thead>
                                     <tr>
+                                        <th class="text-center"><span>№</span></th>
                                         <th class="text-center"><span>Title</span></th>
                                         <th class="text-center"><span>Description</span></th>
                                         <th class="text-center"><span>Date added</span></th>
@@ -56,25 +57,34 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    <?php
+                                    foreach ($this->vacancies as  $vacancy):
+                                        ?>
                                     <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        <td><?=$vacancy->N?></td>
+                                        <td><?=$vacancy->title?></td>
+                                        <td><?=$vacancy->description?></td>
+                                        <td><?=$vacancy->date_added?></td>
+                                        <td><?=$vacancy->assigned?></td>
                                         <td>
-                                            <button class = "btn btn-sm btn_c" data-action="info" data-pid="">
+                                            <button id="<?=$vacancy->id?>" class="btn btn-sm btn_c" data-action="info">
                                                 <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                                             </button>
                                         </td>
                                         <td>
-                                            <button class = "btn btn-sm btn_c" data-action="delete" data-pid="">
+                                            <button id="<?=$vacancy->id?>" class="btn btn-sm btn_c" data-action="delete">
                                                 <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
                                             </button>
                                         </td>
                                     </tr>
+                                        <?php
+                                    endforeach;
+                                    ?>
                                     </tbody>
                                 </table>
                             </div>
+                            <?=popupboxHelper::Form("delBox")?>
+        <?= paginationHelper::Form($this->vCount, "/workspace/Vacancies", $this->page);?>
                         </div>
                     </div>
                 </div>
@@ -97,5 +107,52 @@
         if(e.target == this){
             $(this).removeClass('open');
         }
-    })
+    });
+    $("#btnAdd").on('click', function(){
+        $.ajax(
+            {
+                type: 'POST',
+                url: $('#form_new_vacancy').attr('action'),
+                data: $('#form_new_vacancy').serialize()
+            })
+            .done( function(data ){
+                if(data['status'] == 1) {
+                    $("#new_vac").removeClass('open');
+
+                    $('.badge.badge-primary').text(data.vCount);
+                    $(".table>tbody").html(data.table);
+                    
+                    $(".pull-right>.pagination").detach();
+                    $(".table-responsive").after(data.pagination);
+                }
+            })
+            .fail( function() {
+                alert("error");
+            });
+    });
+    $("#fvacancies").on('click','.btn[data-action="delete"]', function(e){
+        e.preventDefault();
+        var currentRow = $(this).closest("tr");
+        var message = $(currentRow).children('td:nth-child(2)').text();
+        $('.popupbox>div>p').text("Delete "+message+" ?");
+        $('.popupbox').addClass('open');
+    });
+
+    $("#pub_ok").on("click", function(){
+        $.ajax({
+            dataType: "json",
+            url: '/super/delete/' + currentUser.id
+        }).done(function(data){
+            if(data['status'] == 1) {
+                $("#delBox").removeClass("open");
+                var tr = $(currentUser).closest('tr');
+                tr.fadeOut(600, function(){tr.remove();});
+                setTimeout(function(){
+                    GetAnswer(currentPage, 'wrap')
+                }, 1000);
+            }
+        }).fail(function() {
+            alert("error");
+        });
+    });
 </script>

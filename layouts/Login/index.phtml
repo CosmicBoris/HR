@@ -1,16 +1,18 @@
-<div class="popupbox" id="pblogin" role="alert" data-attr="glued">
-    <div class="popupbox-container">
+<div class="popupbox white" id="pblogin" role="alert" data-attr="glued">
+    <div class="popupbox-container lg">
+        <h2>Welcome User!</h2>
         <p></p>
         <form id="FL" action="/Login">
             <input name="email" class="field" type="text" placeholder="E-MAIL">
             <input name="password" class="field" type="password" placeholder="PASSWORD">
         </form>
-        <ul class="cd-buttons inactive" style="padding-left: 0;">
+        <ul class="lg-buttons inactive" style="padding-left: 0;">
             <li><a id="btnLogin">Log In</a></li>
         </ul>
     </div>
 </div>
-<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+<!--<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>-->
+<script src="<?=@Config::JAVAScripts_DIR?>md5.js"></script>
 <script>
     $(document).ready(function(){
         setTimeout(function(){
@@ -25,7 +27,7 @@
     $( ":input" ).keyup(function( event ) {
         var l = document.getElementsByName("email")[0].value;
         var p = document.getElementsByName("password")[0].value;
-        var btn = document.getElementsByClassName("cd-buttons")[0];
+        var btn = document.getElementsByClassName("lg-buttons")[0];
         if(l != '' && p != ''){
             RemoveClass(btn, "inactive");
         } else
