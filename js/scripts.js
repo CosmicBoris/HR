@@ -131,6 +131,36 @@ function GetAnswer(url, callBackElementId)
     }
 }
 
+function PostForm(id_str, callbackFunction)
+{
+    var form = document.getElementById(id_str);
+    var req;
+    if (window.XMLHttpRequest) {
+        req = new XMLHttpRequest();                      //  новые браузеры
+    } else {
+        req = new ActiveXObject("Microsoft.XMLHTTP");    //  древние IE 5...
+    }
+
+    req.responseType = 'JSON';
+    req.timeout = 5000;
+    req.addEventListener('load', function(evt){
+        if(this.status == 200){
+            callbackFunction(JSON.parse(req.response));
+        }
+    });
+    req.addEventListener('error', GetJsonErrorHandle);
+    req.addEventListener('loadstart', function (evt){
+        loadingScreen(true);
+    });
+
+    req.onreadystatechange = function(){
+        if (req.readyState == 4)
+            loadingScreen(false);
+    };
+    req.open("POST", form.getAttribute('action'), true);
+    req.send( serialize(form) );
+}
+
 function GetJsonResponse(address, callbackFunction)
 {
     var req;
@@ -139,24 +169,25 @@ function GetJsonResponse(address, callbackFunction)
     } else {
         req = new ActiveXObject("Microsoft.XMLHTTP");    //  древние IE 5...
     }
-    req.onreadystatechange = function()
-    {
-        if (req.readyState == 4 && req.status == 200) {
-            loadingScreen(false);
-            callbackFunction(JSON.parse(req.responseText));
-        } else if (req.status == 404) {
-            loadingScreen(false);
-            callbackFunction(false);
+
+    req.responseType = 'JSON';
+    req.timeout = 5000;
+    req.addEventListener('load', function(evt){
+        if(this.status == 200){
+            callbackFunction(JSON.parse(req.response));
         }
+    });
+    req.addEventListener('error', GetJsonErrorHandle);
+    req.addEventListener('loadstart', function (evt){
+        loadingScreen(true);
+    });
+
+    req.onreadystatechange = function(){
+        if (req.readyState == 4)
+            loadingScreen(false);
     };
-    req.onerror = GetJsonErrorHandle;
     req.open("GET", address, true);
-    loadingScreen(true);
-    try {
-        req.send();
-    } catch (error){
-        GetJsonErrorHandle(error);
-    }
+    req.send();
 }
 
 function GetJsonErrorHandle(obj)

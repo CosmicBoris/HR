@@ -16,15 +16,14 @@ class paginationHelper
     {
         self::$elementsPerPage = $count;
     }
-    static function Form($count, $destination)
+    static function Form($count, $destination, $page = 0)
     {
-        $page = Url::GetParam();
         if(self::$currentPage == 0 && $page > 0){
             self::$currentPage = $page;
         }
 
         if($count <= self::$elementsPerPage) {
-            return;
+            return false;
         }
         self::$nPages = ceil($count/self::$elementsPerPage);
 
@@ -34,7 +33,7 @@ class paginationHelper
         if(self::$currentPage == 0){
             $output .= '<li class="disabled">';
         }else{
-            $output .= '<li class="pageAct" data-action="'.$destination.'/0">';
+            $output .= '<li class="pageAct" data-action="'.$destination.'">';
         }
         $output .='<span aria-hidden="true">&laquo;</span></li>';
 
@@ -44,12 +43,12 @@ class paginationHelper
                 $output .= '<li class="active"><span>' . ($i + 1) . ' <span class="sr-only">(0)</span></span></li>';
                 continue;
         }
-            $output .= '<li class="pageAct" data-action="'.$destination.'/'. $i .'"><span>'.($i + 1).'</span></li>';
+            $output .= '<li class="pageAct" data-action="'.$destination.'?page='. $i .'"><span>'.($i + 1).'</span></li>';
         endfor;
-        if(self::$currentPage == self::$nPages - 1){
+        if (self::$currentPage == self::$nPages - 1) {
             $output .= '<li class="disabled">';
-        }else{
-            $output .= '<li class="pageAct" data-action="'.$destination.'/'.(self::$nPages - 1).'">';
+        } else {
+            $output .= '<li class="pageAct" data-action="'.$destination.'?page='.(self::$nPages - 1).'">';
         }
 
         $output .= '<a aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li></ul>';
@@ -62,10 +61,10 @@ class paginationHelper
     }
 
     /**
-     * @param mixed $currentPage
+     * @param integer $newPage
      */
-    public static function setCurrentPage($currentPage)
+    public static function setCurrentPage($newPage)
     {
-        self::$currentPage = ($currentPage === false) ? 0 : $currentPage;
+        self::$currentPage = $newPage;
     }
 }
