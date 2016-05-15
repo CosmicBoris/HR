@@ -1,5 +1,6 @@
 <?php
-class LogoutController{
+class LogoutController
+{
 	public function actionIndex()
 	{
 		setcookie(session_id(), "", time() - 3600);

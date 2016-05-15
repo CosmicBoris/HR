@@ -12,7 +12,7 @@ class Router
 
     public function __construct()
 	{
-        self::$segments = explode('/', explode('?', $_GET['url'])[0]);
+        self::$segments = explode('/', explode('?', $_GET['url'])[0]); // Uri without get parameters
 		$this->Start();
 	}
 

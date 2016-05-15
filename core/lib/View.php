@@ -70,9 +70,7 @@ class View
     public function SetPropertyArray($array)
     {
         foreach($array as $key => $value)
-        {
             $this->_data->$key = $value;
-        }
     }
     public function SetErrors($errors, $key = false)
     {
@@ -81,47 +79,5 @@ class View
         }else{
             $this->_errors = $errors;
         }
-    }
-    public function GetError($errorType = false, $allErrors = false)
-    {
-        $output = "";
-        if(!empty($this->_errors)):
-        $output .= '<div class="alert alert-danger" role="alert">';
-        $output .= '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>';
-        $output .= '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><span>';
-
-            // TODO check if errorType if array;
-            if($allErrors):
-                foreach(($errorType !== false) ? $this->_errors[$errorType] : $this->_errors as $error):
-                    if(is_array($error)){
-                        foreach($error as $item => $value):
-                            $output .= "<span>$item : $value</span>";
-                        endforeach;
-                    }
-                    else {
-                        $output.="<span>$error</span>";
-                    }
-                endforeach;
-            else:
-                $output.='<span>'.$this->_errors[$errorType][0].'</span></span><br>';
-            endif;
-        $output.="</div>";
-        endif;
-        return $output;
-    }
-    public function GetSuccess()
-    {
-        if(isset($this->success)):
-?>
-        <div class="alert alert-success alert-dismissible fade in" role="alert">
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                <span>
-                    <?=$this->success?>
-                </span>
-        </div>
-        <br>
-<?
-        endif;
     }
 }
