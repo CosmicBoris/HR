@@ -7,7 +7,7 @@
             <div id="LContainer" class="container-fluid">
                 <h2 class="info">Vacancies <span class="badge badge-primary"><?=$this->vCount;?></span></h2>
 
-                <div id="new_vac" class="paper_dialog">
+                <div id="new_entry" class="paper_dialog">
                     <div id="addCandidate" class="paper">
                         <div class="box clearfix">
                             <h3>new vacancy</h3>
@@ -15,7 +15,7 @@
                             <div class="clearfix"></div>
                             <hr>
                             <div class="form-group text-center">
-                                <form id="form_new_vacancy" action="/workspace/Vacancies" method="POST">
+                                <form id="form_new_entry" action="/workspace/Vacancies" method="POST">
                                     <span id="warnings" class="text-danger"></span>
                                     <p><input class="field" type="text" name="title" placeholder="Title"></p>
 
@@ -100,43 +100,6 @@
 </div>
 
 <script>
-    $("#plus_one").on('click', function(){
-        $("#new_vac").addClass('open');
-    });
-    $("#new_vac").on('click', function(e){
-        if(e.target == this){
-            $(this).removeClass('open');
-        }
-    });
-    $("#btnAdd").on('click', function(){
-        $.ajax(
-            {
-                type: 'POST',
-                url: $('#form_new_vacancy').attr('action'),
-                data: $('#form_new_vacancy').serialize()
-            })
-            .done( function(data ){
-                if(data['status'] == 1) {
-                    $("#new_vac").removeClass('open');
-
-                    $('.badge.badge-primary').text(data.vCount);
-                    $(".table>tbody").html(data.table);
-                    
-                    $(".pull-right>.pagination").detach();
-                    $(".table-responsive").after(data.pagination);
-                }
-            })
-            .fail( function() {
-                alert("error");
-            });
-    });
-    $("#fvacancies").on('click','.btn[data-action="delete"]', function(e){
-        e.preventDefault();
-        var currentRow = $(this).closest("tr");
-        var message = $(currentRow).children('td:nth-child(2)').text();
-        $('.popupbox>div>p').text("Delete "+message+" ?");
-        $('.popupbox').addClass('open');
-    });
 
     $("#pub_ok").on("click", function(){
         $.ajax({

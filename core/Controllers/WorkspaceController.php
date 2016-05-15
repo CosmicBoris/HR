@@ -42,11 +42,52 @@ class WorkspaceController extends Controller
     }
     public function actionCandidates()
     {
-        $this->_view->SetTitle('Candidates');
-        if($this->isAjax())
-            $this->_view->partialRender();
-        else {
-            $this->_view->render();
+        if($this->isPost()) {
+            $response = array();
+            $candidate = new Candidate($_POST);
+            
+            if($this->_model->AddCandidate($candidate, $_POST['vacancy_id'])) {
+                $response['status'] = 1;
+            } else {
+                $response['error'] = $this->_model->getDBError();
+            }
+
+            $candidates = $this->_model->getCandidates(0);
+
+            foreach( $candidates as $c ){
+                $c->btnInfo = htmlbuttonHelper::Form(
+                    ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
+                        '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
+                );
+                $c->btnRemove = htmlbuttonHelper::Form(
+                    ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
+                        '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
+                );
+            }
+
+            $ht = new htmltableHelper();
+            $response['table'] = $ht->BodyFromObj($candidates,
+                ['N', 'fullname', 'email', 'phone','assigned','btnInfo','btnRemove']
+            )->getTableBody();
+
+            $response['vCount'] = $this->_model->CandidatesCount();
+            $response['pagination'] = paginationHelper::Form(
+                $response['vCount'], "/workspace/Candidates"
+            );
+
+            Response::ReturnJson($response);
+        } else {
+            $this->_view->page = $_GET['page'];
+            $this->_view->candidates = $this->_model->getCandidates(paginationHelper::Limit($this->_view->page));
+            $this->_view->vCount = $this->_model->CandidatesCount();
+            $this->_view->vacancies = $this->_model->getVacancies(-1);
+
+            $this->_view->SetTitle('Candidates');
+            if($this->isAjax())
+                $this->_view->partialRender();
+            else {
+                $this->_view->render();
+            }
         }
     }
     public function actionVacancies()
@@ -90,7 +131,7 @@ class WorkspaceController extends Controller
             Response::ReturnJson($response);
         } else {
             $this->_view->page = $_GET['page'];
-            $this->_view->users = $this->_model->GetCandidates();
+            $this->_view->users = $this->_model->getCandidates();
             $this->_view->vCount = $this->_model->vacanciesCount();
             $this->_view->vacancies = $this->_model->getVacancies($this->_view->page);
             

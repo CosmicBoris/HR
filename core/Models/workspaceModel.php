@@ -8,40 +8,49 @@
  */
 class WorkspaceModel extends Model
 {
+    const GET_ALL = -1;
+
     public function __construct()
     {
         parent::__construct();
     }
-    public function GetMyEntitys($from, $param = false)
+
+    public function AddCandidate($candidate, $vacancy_id)
     {
-        $entitys = $this->dbLink->GetEntitysInfo(paginationHelper::Limit($from), $param);
-        if(count($entitys)==0 && $from > 0){
-            paginationHelper::setCurrentPage($from-1);
-            return $this->dbLink->GetEntitysInfo(paginationHelper::Limit($from-1), $param);
-        }else{
-            return $entitys;
+        $this->dbLink->autocommit(FALSE);
+
+        $result = $this->dbLink->insert('candidates', $candidate)->RunQuery();
+        $candidate_id = $this->dbLink->lastInsertedId();
+        if($result) {
+            $result = $this->dbLink->insert('user_candidates',
+                ['user_id'=>Auth::GetUserID(), 'candidate_id'=>$candidate_id])->RunQuery();
         }
+        if($vacancy_id && $result) {
+            $result = $this->dbLink->insert('vacancies_candidates',
+                ['vacancy_id'=>$vacancy_id, 'candidate_id'=>$candidate_id])->RunQuery();
+        }
+
+        $this->dbLink->commit();
+        return $result;
     }
-    
-    public function GetMYEntitysCount($param = false)
-    {
-        if(isset($param)){
-            return $this->dbLink->select(array('entity' => 'e'),
-                array('e' => array('Entity_Id')))
-                ->innerJoin(array('entity_user'=>'eu'),array('Entity_Id' => 'EntityId'))
-                ->where(array('eu.UserId'=>Auth::GetUserID(), 'e.Entity_EDRPOU' => '%'.$param.'%'),'LIKE','AND')
-                ->RunQuery()->num_rows;
-        }
-        return $this->dbLink->select('entity_user', 'EntityId')
-            ->where(array('UserId'=>Auth::GetUserID()))
+    public function CandidatesCount(){
+        return $this->dbLink->select('candidates', 'id')
+            ->innerJoin('user_candidates', ['id'=>'candidate_id'])
+            ->where(['user_id'=>Auth::GetUserID()])
             ->RunQuery()->num_rows;
     }
-    
-    public function GetCandidates($id = false) {
-        if($id) return $this->dbLink->GetCandidate($id);
-        return $this->dbLink->GetCandidates();
+    public function getCandidate($id) {
+        return $this->dbLink->GetCandidate($id);
     }
-    
+    public function getCandidates($from = -1)
+    {
+        $cs = $this->dbLink->GetCandidates($from);
+        if( !$cs && $from > 0 )
+            $cs = $this->dbLink->GetCandidates($from-1);
+        return $cs;
+    }
+
+
     public function AddVacancy($vacancy, $candidate_id)
     {
         $this->dbLink->autocommit(FALSE);
@@ -57,12 +66,11 @@ class WorkspaceModel extends Model
         $this->dbLink->commit();
         return $result;
     }
-    public function vacanciesCount(){
+    public function VacanciesCount(){
         return $this->dbLink->select('vacancies', 'id')
             ->where(['user_id'=>Auth::GetUserID()])
             ->RunQuery()->num_rows;
     }
-
     public function getVacancies($from = 0, $searchStr = false)
     {
         $sql = "SELECT `id`,`user_id`,`title`,`state`,`date_added`,`description`, "
@@ -76,7 +84,7 @@ class WorkspaceModel extends Model
 
         $vacancies = array();
 
-        $result = $this->dbLink->ExecuteSql($sql.$order.$limit);
+        $result = $this->dbLink->ExecuteSql( ($from != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
         if(!$result) return false;
 
         $n = paginationHelper::Limit($from);
@@ -92,7 +100,7 @@ class WorkspaceModel extends Model
 
             $limit = "LIMIT ".paginationHelper::Limit($from-1).",".paginationHelper::$elementsPerPage;
 
-            $result = $this->dbLink->ExecuteSql($sql.$order.$limit);
+            $result = $this->dbLink->ExecuteSql(($from != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
             if(!$result) return false;
 
             $n = paginationHelper::Limit($from-1);

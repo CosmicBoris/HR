@@ -192,17 +192,16 @@ final class DbHelper {
         $this->_sql .= " LIMIT $from,$count ";
         return $this;
     }
-
 	/**
 	 * @return bool | mysqli_result
 	 */
 	public function RunQuery()
 	{
-        $file = fopen($_SERVER['DOCUMENT_ROOT'].Config::LOG_DIR.'SQL_Query_log.txt', 'ab');
+        /*$file = fopen($_SERVER['DOCUMENT_ROOT'].Config::LOG_DIR.'SQL_Query_log.txt', 'ab');
         if ($file) {
             $str = "\r\nData: ".date("Y-m-d H:i:s")."\r\nSQL: \r\n".$this->_sql."\r\n";
             fwrite($file, $str);
-        }
+        }*/
 
 		$result = $this->_db->query($this->_sql);
 		$this->_sql = '';
@@ -554,21 +553,30 @@ final class DbHelper {
 		return $users;
 	}
 
-	function GetCandidates()
+	function GetCandidates($from)
 	{
+		$sql = "SELECT `id`,`fullname`,`sex`,`age`,`profile`,`email`,`phone`,`photo`,`skills`,"
+			."COUNT(`vc`.`candidate_id`) AS `assigned` "
+			."FROM `candidates` "
+			."LEFT JOIN `vacancies_candidates` AS `vc` ON `candidates`.`id`=`vc`.`candidate_id` "
+			."LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id` "
+			."WHERE `uc`.`user_id`=".Auth::GetUserID()
+			." GROUP BY `id` ";
+		/*$order = 'ORDER BY `date_added` DESC ';*/
+		$limit = "LIMIT $from,".paginationHelper::$elementsPerPage;
+
+		$result = $this->_db->query( ($from != -1 ) ? $sql.$limit : $sql);
+		if(!$result || $result->num_rows == 0) return false;
+		
 		$candidates = array();
-		$candidate = new Candidate();
 
-		$result = $this->select('candidates', array_keys(get_object_vars($candidate)))
-			->innerJoin(['user_candidates'=>'uc'], ['id'=>'candidate_id'])
-			->where(array('uc.user_id'=> Auth::GetUserID()))->RunQuery();
-
-		if(empty($this->_errors)) {
-			while ($obj = $result-> fetch_assoc()) {
-				$candidate = new Candidate($obj);
-				$candidates[] = $candidate;
-			}
+		while ($obj = $result-> fetch_assoc()) {
+			$candidate = new Candidate($obj);
+			$candidate->N = (int)++$from;
+			$candidate->assigned = $obj['assigned'];
+			$candidates[] = $candidate;
 		}
+		
 		return $candidates;
 	}
 	function GetCandidate($id)
@@ -587,42 +595,6 @@ final class DbHelper {
 		return $candidate;
 	}
 
-	function GetEntitysInfo($from, $param = false)
-	{
-		$sql = 'SELECT `e`.`Entity_EDRPOU`, `e`.`Entity_Name`,`ceo`.`FullName`, `ea`.`Address` '
-			.'FROM `entity` AS `e`'
-			.' INNER JOIN `entity_address` AS `ea` ON `e`.`Entity_pAddress`=`ea`.`Address_Id`'
-            .' INNER JOIN `entityofficial` AS `ceo` ON `e`.`Entity_DirectorId`=`ceo`.`Id`'
-			.' INNER JOIN `entity_user` AS `eu` ON `e`.`Entity_Id`=`eu`.`EntityId`'
-            .' WHERE `eu`.`UserId`='. Auth::GetUserID();
-
-
-		if($param){
-			$param = $this->GetSafeStr('%'.$param.'%', true);
-			$sql .=" AND `e`.`Entity_EDRPOU` LIKE $param";
-		}
-
-		$sql .=' ORDER BY `e`.`Entity_DateModified`'
-			.' LIMIT '.$from.','.paginationHelper::$elementsPerPage;
-
-		$co = array();
-		$c = array();
-
-		if ($result = $this->_db->query($sql))
-		{
-			while ($obj = $result->fetch_assoc()) {
-				$c['No'] = (int)++$from;
-				$c['Entity_EDRPOU'] = $obj['Entity_EDRPOU'];
-				$c['Name'] = $obj['Entity_Name'];
-				$c['CEO'] = $obj['FullName'];
-				$c['Addr'] = $obj['Address'];
-				$co[] = $c;
-			}
-			$result->close();
-			return $co;
-		}
-		return array("error" => $this->_db->error_list);
-	}
 	function GetEntityInfoFull($id)
 	{
 		 $sql = "SELECT `e`.`Entity_Id`,`e`.`Entity_EDRPOU`, `e`.`Entity_DRFO`, `e`.`Entity_DateModified`, `e`.`Entity_Name`, `e`
@@ -772,37 +744,14 @@ final class DbHelper {
 		return false;
 	}
 
-	function DeleteReq($uid)
+	function DeleteUser($uid)
 	{
-		$sql = 'DELETE FROM `user` WHERE `UserID`='.$uid;
+		$sql = 'DELETE FROM `user` WHERE `id`='.$uid;
 	
 		if ($result = $this->_db->query($sql)) {
     		return true;
 		}
 		return false;
-	}
-	function DeleteUser($uid)
-	{
-		$this->_db->autocommit(FALSE);
-		$sql = 'INSERT INTO';
-		$sql .=' `deleteduser`(`UserID`, `UserLogin`, `UserPassword`, `UserFullName`, `UserEmail`, `InspectionID`, `permissionID`)';
-		$sql .=' SELECT `u`.`UserID`, `u`.`UserLogin`, `u`.`UserPassword`,';
-		$sql .=' `u`.`UserFullName`, `u`.`UserEmail`, `u`.`InspectionID`,`p`.`permissionID`';
-		$sql .=' FROM `user` AS `u`';
-		$sql .=' INNER JOIN `userpermission` AS `p` ON `u`.`UserID`=`p`.`UserID`';
-		$sql .=' WHERE `u`.`UserID`='. $uid;
-
-		if (false !== ($this->_db->query($sql)))
-		{
-			$sql = 'DELETE FROM `user` WHERE `UserID`='.$uid;
-
-			if (false !== ($this->_db->query($sql))) {
-				if ($this->_db->commit()) {
-					return true;
-				}
-			}
-		}
-		return $this->_db->error_list.' '.$this->_db->errno;
 	}
 	private function setErrors(){
 		$this->_errors = $this->_db->error_list;
