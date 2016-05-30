@@ -1,79 +1,108 @@
-<div class="row">
-    <div class="col-md-3 col-xs-6">
-        <div class="clr">
-            <div id="sensor1_info">
-                <h3>Sensor:</h3>
-                <p id="s1_data"></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-xs-6">
-        <div class="clr">
-            <div id="sensor2_info">
-                <h3>Sensor:</h3>
-                <p id="s2_data"></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-xs-6">
-        <div class="clr">
-            <div id="card_info">
-                <h3><span class="glyphicon glyphicon-hdd"></span> Card info:</h3>
-                <p id="sd_size"></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-xs-6">
-        <div class="clr">
-            <div id="heap_info">
-                <h3><span class="glyphicon glyphicon-dashboard"></span> Free heap:</h3>
-                <p id="heap_size"></p>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title pull-left">Stored files:</h3>
-                <div class="pull-right">
-                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                    <input id="searchbox" class="" type="text" placeholder="SEARCH">
-                    <label></label>
+<?include_once Config::LAYOUT_DIR."userInfo".Config::LAYOUT_TYPE;?>
+<?=Menu::getMenu()?>
+<div class="wrap">
+    <div class="innerWrap">
+        <div class="slide_side">
+            <div id="LContainer" class="container-fluid">
+
+                <div id="new_entry" class="paper_dialog">
+                    <div class="paper">
+                        <div class="box clearfix">
+                            <h3>new event</h3>
+                            <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
+                            <div class="clearfix"></div>
+                            <hr>
+                            <div class="form-group text-center">
+                                <form id="form_new_entry" action="/workspace/Events" method="POST">
+                                    <span id="warnings" class="text-danger"></span>
+                                    <p><input class="field" type="text" name="title" placeholder="Title"></p>
+
+                                    <label for="form_datetime">Beginning at:</label>
+                                    <p>
+                                        <input size="16" type="text" name="start" readonly class="form_datetime field">
+                                    </p>
+
+                                    <label for="form_datetime">End at:</label>
+                                    <p>
+                                        <input size="16" type="text" name="end" readonly class="form_datetime field">
+                                    </p>
+
+                                    <label for="vacancy_id">Assign vacancy:</label>
+                                    <select class="form-control _select" name="vacancy_id">
+                                        <option value="0">None</option>
+                                        <?=htmlselectHelper::Form($this->vacancies, 'id', 'title')?>
+                                    </select>
+
+                                    <label for="candidate_id">Assign candidate:</label>
+                                    <select class="form-control _select" name="candidate_id">
+                                        <option value="0">None</option>
+                                        <?=htmlselectHelper::Form($this->users, 'id', 'fullname')?>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="clearfix"></div>
+
+                <div class="row">
+                    <div class="col-md-3 col-xs-6">
+                        <div class="clr">
+                            <div>
+                                <h3>Interviews</h3>
+                                <p id="s1_data"></p>
+                                <button id="plus_one" class="button button--rayen bdr-white" data-text="+1"><span>Add new</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-6">
+                        <div class="clr">
+                            <div>
+                                <h3>Hired:</h3>
+                                <p id="s2_data"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-6">
+                        <div class="clr">
+                            <div>
+                                <h3>Rejected:</h3>
+                                <p id="sd_size"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xs-6">
+                        <div class="clr">
+                            <div id="heap_info">
+                                <h3>Results:</h3>
+                                <p></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover table-condensed">
-                    <thead>
-                    <tr>
-                        <th class="text-center"><span>Name</span></th>
-                        <th class="text-center" style="width: 8em"><span>type</span></th>
-                        <th class="text-right" style="width: 12em"><span>size</span></th>
-                        <th colspan="3"></th>
-                    </tr>
-                    </thead>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td style="width: 35px">
-                        <button class = "btn btn-sm btn_c" data-action="info" data-pid="">
-                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                        </button>
-                    </td>
-                    <td style="width: 35px">
-                        <button class = "btn btn-sm btn_c" data-action="delete" data-pid="">
-                            <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-                        </button>
-                    </td>
-                    <td style="width: 35px">
-                        <button class = "btn btn-sm btn_c" data-action="download" data-pid="">
-                            <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
-                        </button>
-                    </td>
-                </table>
+        </div>
+        <div class="slide_side right_side">
+            <div id="RContainer" class="container-fluid">
+
             </div>
         </div>
     </div>
 </div>
+
+<script>
+
+    $(".form_datetime").datetimepicker({
+        format: "dd-MM-yyyy hh:ii",
+        autoclose: true,
+        todayBtn: true,
+        minuteStep: 10
+    });
+
+    var calendar = $('#calendar').calendar({events_source: '/workspace/Feed'});
+</script>

@@ -1,20 +1,21 @@
 <h2 class="info">Candidates <span class="badge badge-primary"><?=$this->vCount;?></span></h2>
-<div id="new_entry" class="paper_dialog">
 
+<div id="new_entry" class="paper_dialog">
     <div id="addCandidate" class="paper">
         <div class="box clearfix">
             <h3>new candidate</h3>
             <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
             <div class="clearfix"></div>
+            <h5></h5>
             <hr>
             <div class="form-group text-center">
-                <form id="form_new_entry" action="/workspace/Candidates" method="POST">
+                <form id="form_new_entry" action="/workspace/AddCandidate" method="POST">
                     <span id="warnings" class="text-danger"></span>
-                    <p><input class="field" type="text" name="fullname" placeholder="Name"></p>
+                    <p><input class="field" type="text" name="fullname" placeholder="Name" maxlength="96"></p>
 
-                    <p><input class="field" type="text" name="phone" placeholder="10 digit phone number"></p>
+                    <p><input class="field" type="text" name="phone" placeholder="10 digit phone number" maxlength="10"></p>
 
-                    <p><input class="field" type="text" name="email" placeholder="E-mail"></p>
+                    <p><input class="field" type="text" name="email" placeholder="E-mail" maxlength="48"></p>
 
                     <p><input class="field" type="text" name="profile" placeholder="Link to summary"></p>
 
@@ -37,7 +38,7 @@
                     <p><input class="field" type="number" min="14" max="90" name="age" placeholder="Age"></p>
 
                     <label for="skills">Key skills:</label>
-                    <p><input type="text" name="skills" data-role="tagsinput"></p>
+                    <p><input type="text" name="skills" data-role="tagsinput" maxlength="256"></p>
 
                     <label for="vacancy_id">Assign vacancy:</label>
                     <select class="form-control _select" name="vacancy_id">
@@ -53,7 +54,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading-pure">
                 <button id="plus_one" class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
                 <div class="pull-right">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -63,7 +64,7 @@
                 <div class="clearfix"></div>
             </div>
             <div class="table-responsive">
-                <table id="fvacancies" class="table table-bordered table-striped table-hover table-condensed">
+                <table id="fvacancies" class="table table-bordered table-hover table-condensed">
                     <thead>
                     <tr>
                         <th class="text-center"><span>№</span></th>
@@ -102,7 +103,7 @@
                 </table>
             </div>
             <?=popupboxHelper::Form("delBox")?>
-            <?=paginationHelper::Form($this->vCount, "/workspace/Candidates", $this->page);?>
+            <?=paginationHelper::Form($this->vCount, "/workspace/Candidates");?>
         </div>
     </div>
 </div>

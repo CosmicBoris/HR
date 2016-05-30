@@ -16,12 +16,8 @@ class paginationHelper
     {
         self::$elementsPerPage = $count;
     }
-    static function Form($count, $destination, $page = 0)
+    static function Form($count, $destination)
     {
-        if(self::$currentPage == 0 && $page > 0){
-            self::$currentPage = $page;
-        }
-
         if($count <= self::$elementsPerPage) {
             return false;
         }
@@ -56,15 +52,18 @@ class paginationHelper
 
         return $output;
     }
-    static function Limit($cPage){
-        return $cPage * self::$elementsPerPage;
+    static function Limit() {
+        return self::$currentPage * self::$elementsPerPage;
     }
-
     /**
      * @param integer $newPage
      */
     public static function setCurrentPage($newPage)
     {
         self::$currentPage = $newPage;
+    }
+    public static function getCurrentPage()
+    {
+        return self::$currentPage;
     }
 }

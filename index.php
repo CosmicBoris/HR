@@ -1,7 +1,11 @@
 <?php
-/*    ini_set('session.cookie_lifetime', 60 * 60);
+/*  ini_set('session.cookie_lifetime', 60 * 60);
     ini_set('session.gc-maxlifetime', 60 * 60);*/
 	session_start();
+    define('LOG_QUERY_AND_RESULT', TRUE);
+
+    // Main config file
+    require_once 'core/App/Config.php';
 
     function __autoload($class_name)
     {
@@ -9,7 +13,7 @@
         $segments = preg_split('/(?<=[a-z])(?=[A-Z])/', $class_name);
         $filename = $class_name.'.php';
         if (count($segments) < 2) {
-            $filepath = 'core/lib/';
+            $filepath = 'core/Library/';
         } else {
             $filepath = 'core/'. $segments[1]. 's/';
         }

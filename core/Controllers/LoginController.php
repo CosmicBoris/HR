@@ -22,7 +22,7 @@ class LoginController extends Controller
         {
             Response::ReturnJson();
             $response = array();
-            $validator = Validator::GetInstance()->Validate($_POST, ['email','password'])->CheckForEmpty();
+            $validator = Validator::GetInstance()->Prepare($_POST, ['email','password'])->CheckForEmpty();
             if(!$validator->IsError()) {
                 $this->_model = new loginModel();
                 if(!$response = $this->_model->Login($validator->GetField('email'), $validator->GetField('password'))) {

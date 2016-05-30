@@ -1,6 +1,7 @@
 addDefaultCharset UTF-8
 
 RewriteEngine on
+RewriteCond %{REQUEST_URI} !\.(?:css|js|jpe?g|gif|png)$ [NC]
 RewriteCond %{REQUEST_FILENAME} !^favicon\.ico
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

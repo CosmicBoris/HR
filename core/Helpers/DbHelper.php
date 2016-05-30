@@ -17,6 +17,10 @@ final class DbHelper {
 		}
 		$this->_db->set_charset("utf-8");
 		date_default_timezone_set('Europe/Kiev');
+
+		if(defined('LOG_QUERY_AND_RESULT')) {
+			$this->_hfile = fopen($_SERVER['DOCUMENT_ROOT'].'/'.Config::LOG_DIR.'SQL_LOG.txt', 'ab');
+		}
 	}
 	/**This method allow only one connected to Db object to exists!
 	 * @return DbHelper
@@ -121,6 +125,12 @@ final class DbHelper {
 				.' VALUES('.$this->GetSafeStr(array_values($obj), true).')';
 		return $this;
 	}
+	public function delete($table)
+	{
+		$this->_sql = 'DELETE FROM '.$this->GetSafeStr($table);
+
+		return $this;
+	}
 	public function innerJoin($table, $fields, $tableToJoin = false)
 	{
 		if(is_array($table)){ // example ['user'=>'u'] user AS u
@@ -145,13 +155,14 @@ final class DbHelper {
 		}
 		return $this;
 	}
+
 	/**
-	 * @param $params
+	 * @param array $params
 	 * @param string $comparison (=, LIKE, IS, etc...)
 	 * @param string $condition (AND | OR)
 	 * @return $this
 	 */
-	public function where($params, $comparison = '=', $condition = '')
+	public function where(array $params, $comparison = '=', $condition = '')
 	{
 		$this->_sql .= ' WHERE ';
 		if(count($params) > 1) {
@@ -197,17 +208,23 @@ final class DbHelper {
 	 */
 	public function RunQuery()
 	{
-        /*$file = fopen($_SERVER['DOCUMENT_ROOT'].Config::LOG_DIR.'SQL_Query_log.txt', 'ab');
-        if ($file) {
-            $str = "\r\nData: ".date("Y-m-d H:i:s")."\r\nSQL: \r\n".$this->_sql."\r\n";
-            fwrite($file, $str);
-        }*/
-
 		$result = $this->_db->query($this->_sql);
+
+		if(isset($this->_hfile)) {
+			$str = "\r\nDate: ".date("Y-m-d H:i:s")."\r\nSQL: \r\n".$this->_sql."\r\nResult: \r\n";
+			fwrite($this->_hfile, $str);
+			fwrite($this->_hfile, print_r($result, TRUE));
+			if(!empty($this->_db->error)){
+				fwrite($this->_hfile, "Errors: \r\n");
+				fwrite($this->_hfile, print_r($this->_db->error_list, TRUE));
+			}
+		}
+
 		$this->_sql = '';
-		if($result === false) $this->setErrors();
-		
-		return $result; 
+		if($result === false) {
+			$this->setErrors();
+		}
+		return $result;
 	}
 	public function showSql(){
 		return $this->_sql;
@@ -228,7 +245,7 @@ final class DbHelper {
 	{
 		$output = null;
 		$this->_sql = $query;
-		$result = $this->_db->query($this->_sql);
+		$result = $this->RunQuery();
 		if ($result && !$this->_db->error)
 		{
 			if($result->num_rows > 1) {
@@ -238,15 +255,14 @@ final class DbHelper {
 				}
 				$result->close();
 				return $output;
-			} else {
+			} else if($result->num_rows == 1) {
 				if($output = $result->fetch_assoc()){
 					$result->close();
 					return $output;
 				}
-			}
+			} else {return 0;}
 		}
 		$this->_errors = $this->_db->error;
-		$result->close();
 		return false;
 	}
 	public function lastInsertedId()
@@ -279,9 +295,10 @@ final class DbHelper {
 			."WHERE `uc`.`user_id`=".Auth::GetUserID()
 			." GROUP BY `id` ";
 		/*$order = 'ORDER BY `date_added` DESC ';*/
-		$limit = "LIMIT $from,".paginationHelper::$elementsPerPage;
 
-		$result = $this->_db->query( ($from != -1 ) ? $sql.$limit : $sql);
+		if($from != -1) $sql.="LIMIT $from,".paginationHelper::$elementsPerPage;
+
+		$result = $this->_db->query($sql);
 		if(!$result || $result->num_rows == 0) return false;
 		
 		$candidates = array();
@@ -309,6 +326,32 @@ final class DbHelper {
 			}
 		}
 		return $candidate;
+	}
+	function FindCandidate(Candidate $c)
+	{
+		$sql = 'SELECT '.$this->GetSafeStr(array_keys(get_object_vars($c))).' FROM `candidates` '
+				.'LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id` '
+				.'WHERE `uc`.`user_id`='.Auth::GetUserID().' AND ';
+		$sql2 ="";
+		if(!empty($c->email))
+			$sql2 = '`candidates`.`email`='.$this->GetSafeStr($c->email, true).' ';
+		if(!empty($c->profile)){
+			if(!empty($sql2))
+				$sql2 .= 'OR ';
+			$sql2 .= '`candidates`.`profile`='.$this->GetSafeStr($c->profile, true).' ';
+		}
+		if(!empty($c->phone)){
+			if(!empty($sql2))
+				$sql2 .= 'OR ';
+			$sql2 .= '`candidates`.`phone`='.$this->GetSafeStr($c->phone, true).' ';
+		}
+		if(!empty($c->fullname)){
+			if(!empty($sql2))
+				$sql2 .= 'OR ';
+			$sql2 .= '`candidates`.`fullname`='.$this->GetSafeStr($c->fullname, true).' ';
+		}
+
+		return $this->ExecuteSql($sql.$sql2);
 	}
 
 	function DeleteUser($uid)

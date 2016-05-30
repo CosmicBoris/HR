@@ -4,115 +4,9 @@
     <div class="innerWrap">
         <div class="slide_side">
             <div id="LContainer" class="container-fluid">
-
-                <h2 class="info">Candidates <span class="badge badge-primary"><?=$this->vCount;?></span></h2>
                 
-                <div id="new_entry" class="paper_dialog">
-                    <div id="addCandidate" class="paper">
-                        <div class="box clearfix">
-                            <h3>new candidate</h3>
-                            <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
-                            <div class="clearfix"></div>
-                            <hr>
-                            <div class="form-group text-center">
-                                <form id="form_new_entry" action="/workspace/Candidates" method="POST">
-                                    <span id="warnings" class="text-danger"></span>
-                                    <p><input class="field" type="text" name="fullname" placeholder="Name"></p>
-
-                                    <p><input class="field" type="text" name="phone" placeholder="10 digit phone number"></p>
-
-                                    <p><input class="field" type="text" name="email" placeholder="E-mail"></p>
-
-                                    <p><input class="field" type="text" name="profile" placeholder="Link to summary"></p>
-
-                                    <div class="form_input_size clearfix">
-                                        <h4>Sex:</h4>
-
-                                        <ul class="cd-form-list">
-                                            <li>
-                                                <input type="radio" name="sex" id="cd-radio-1" value="1" checked>
-                                                <label for="cd-radio-1">male</label>
-                                            </li>
-
-                                            <li>
-                                                <input type="radio" name="sex" id="cd-radio-2" value="2">
-                                                <label for="cd-radio-2">female</label>
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <p><input class="field" type="number" min="14" max="90" name="age" placeholder="Age"></p>
-
-                                    <label for="skills">Key skills:</label>
-                                    <p><input type="text" name="skills" data-role="tagsinput"></p>
-                                    
-                                    <label for="vacancy_id">Assign vacancy:</label>
-                                    <select class="form-control _select" name="vacancy_id">
-                                        <option value="0">None</option>
-                                        <?=htmlselectHelper::Form($this->vacancies, 'id', 'title')?>
-                                    </select>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <button id="plus_one" class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
-                                <div class="pull-right">
-                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                                    <input id="searchbox" class="" type="text" placeholder="SEARCH">
-                                    <label></label>
-                                </div>
-                                <div class="clearfix"></div>
-                            </div>
-                            <div class="table-responsive">
-                                <table id="fvacancies" class="table table-bordered table-striped table-hover table-condensed">
-                                    <thead>
-                                    <tr>
-                                        <th class="text-center"><span>№</span></th>
-                                        <th class="text-center"><span>Name</span></th>
-                                        <th class="text-center"><span>E-mail</span></th>
-                                        <th class="text-center"><span>Phone</span></th>
-                                        <th class="text-center"><span>Assigned</span></th>
-                                        <th colspan="2"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php
-                                    foreach ($this->candidates as $c):
-                                        ?>
-                                        <tr>
-                                            <td><?=$c->N?></td>
-                                            <td><?=$c->fullname?></td>
-                                            <td><?=$c->email?></td>
-                                            <td><?=$c->phone?></td>
-                                            <td><?=$c->assigned?></td>
-                                            <td>
-                                                <button id="<?=$c->id?>" class="btn btn-sm btn_c" data-action="info">
-                                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button id="<?=$c->id?>" class="btn btn-sm btn_c" data-action="delete">
-                                                    <span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                    endforeach;
-                                    ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <?=popupboxHelper::Form("delBox")?>
-                            <?=paginationHelper::Form($this->vCount, "/workspace/Candidates", $this->page);?>
-                        </div>
-                    </div>
-                </div>
+<?include_once Config::LAYOUT_DIR.Router::getControllerName(0)."/candidates_partial".Config::LAYOUT_TYPE;?>
+                
             </div>
         </div>
         <div class="slide_side right_side">
@@ -122,7 +16,3 @@
         </div>
     </div>
 </div>
-
-<script>
-
-</script>

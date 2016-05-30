@@ -33,23 +33,46 @@ class WorkspaceModel extends Model
         $this->dbLink->commit();
         return $result;
     }
-    public function CandidatesCount(){
+    public function CandidatesCount()
+    {
         return $this->dbLink->select('candidates', 'id')
             ->innerJoin('user_candidates', ['id'=>'candidate_id'])
             ->where(['user_id'=>Auth::GetUserID()])
             ->RunQuery()->num_rows;
     }
-    public function getCandidate($id) {
+    public function getCandidate($id)
+    {
         return $this->dbLink->GetCandidate($id);
     }
-    public function getCandidates($from = -1)
+    public function getCandidates($from = 0)
     {
         $cs = $this->dbLink->GetCandidates($from);
-        if( !$cs && $from > 0 )
-            $cs = $this->dbLink->GetCandidates($from-1);
+        if( !$cs && $from > 0 ){
+            paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
+            $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
+        }
+
         return $cs;
     }
+    public function FindCandidate(Candidate $c)
+    {
+        $candidate = new Candidate($this->dbLink->FindCandidate($c));
+        if($candidate) {
+            $par = array();
 
+            if($candidate->fullname == $c->fullname)
+                $par[] = "Name in Base";
+            if($candidate->phone == $c->phone)
+                $par[] = "Phone in Base";
+            if($candidate->profile == $c->profile)
+                $par[] = "Profile in Base";
+            if($candidate->email == $c->email)
+                $par[] = "Email in Base";
+
+            return implode(', ', $par);
+        }
+        return 0;
+    }
 
     public function AddVacancy($vacancy, $candidate_id)
     {
@@ -80,14 +103,15 @@ class WorkspaceModel extends Model
             ."WHERE `user_id`=".Auth::GetUserID()
             ." GROUP BY `id` ";
         $order = 'ORDER BY `date_added` DESC ';
-        $limit ="LIMIT ".paginationHelper::Limit($from).",".paginationHelper::$elementsPerPage;
 
         $vacancies = array();
 
-        $result = $this->dbLink->ExecuteSql( ($from != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
+        if($from != self::GET_ALL) $order .= "LIMIT ".paginationHelper::Limit().",".paginationHelper::$elementsPerPage;
+
+        $result = $this->dbLink->ExecuteSql($sql.$order);
         if(!$result) return false;
 
-        $n = paginationHelper::Limit($from);
+        $n = paginationHelper::Limit();
         foreach ($result as $obj){
             $v = new Vacancy($obj);
             $v->N = (int)++$n;
@@ -96,14 +120,13 @@ class WorkspaceModel extends Model
         }
         
         if(count($vacancies) == 0 && $from > 0) {
-            paginationHelper::setCurrentPage($from-1);
-
-            $limit = "LIMIT ".paginationHelper::Limit($from-1).",".paginationHelper::$elementsPerPage;
+            paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
+            $limit = "LIMIT ".paginationHelper::Limit().",".paginationHelper::$elementsPerPage;
 
             $result = $this->dbLink->ExecuteSql(($from != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
             if(!$result) return false;
 
-            $n = paginationHelper::Limit($from-1);
+            $n = paginationHelper::Limit();
             foreach ($result as $obj){
                 $v = new Vacancy($obj);
                 $v->N = (int)++$from;
@@ -112,35 +135,34 @@ class WorkspaceModel extends Model
             }
         }
         return $vacancies;
-        /*$vacancies = array();
-        $v = new Vacancy();
+    }
+    public function FindVacancy(Vacancy $v)
+    {
         $result = $this->dbLink->select('vacancies', array_keys(get_object_vars($v)))
-            ->where(['user_id'=>Auth::GetUserID()])
-            ->limit(paginationHelper::Limit($from), paginationHelper::$elementsPerPage)
+            ->where(['title'=>$v->title])
             ->RunQuery();
-        if(!$result) return false;
-
-        while ($obj = $result-> fetch_assoc())
-        {
-            $v = new Vacancy($obj);
-            $vacancies[] = $v;
+        if($result->num_rows > 0){
+            return 'Vacancy with such title exists!';
         }
-        $result->close();
+        return 0;
+    }
+    
+    public function AddEvent($event)
+    {
+         return $this->dbLink->insert('events', $event)->RunQuery();
+    }
 
-        if(count($vacancies) == 0 && $from > 0) {
-            paginationHelper::setCurrentPage($from-1);
+    public function Delete($from, $id)
+    {
+        $result = array();
 
-            $result = $this->dbLink->select('vacancies', array_keys(get_object_vars($v)))
-                ->where(['user_id'=>Auth::GetUserID()])
-                ->limit(paginationHelper::Limit($from-1), paginationHelper::$elementsPerPage)
-                ->RunQuery();
-            while ($obj = $result-> fetch_assoc())
-            {
-                $v = new Vacancy($obj);
-                $vacancies[] = $v;
-            }
-            $result->close();
+        if($this->dbLink->delete($from)->where(['id'=>$id])->RunQuery()){
+            $result['success'] = 1;
+        } else {
+            $result['success'] = 0;
+            $result['error'] = $this->dbLink->getErrors();
         }
-        return $vacancies;*/
+
+        return $result;
     }
 }
