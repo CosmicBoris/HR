@@ -1,4 +1,4 @@
-    var nInterval, searchTimer;
+    var nInterval, searchTimer, currentPage;
     function showInspections(id)
     {
         if (id=="0")

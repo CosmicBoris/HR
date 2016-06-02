@@ -68,10 +68,34 @@ $(document).ready(function()
 // DELETE button on table row
     }).on('click','table .btn[data-action="delete"]', function(e){
         e.preventDefault();
+        var id = this.id;
+
         var currentRow = $(this).closest("tr");
+        var rel = $(currentRow).closest("table").attr("data-del-ref");
         var message = $(currentRow).children('td:nth-child(2)').text();
         $('.popupbox>div>p').text("Delete "+message+" ?");
         $('.popupbox').addClass('open');
+
+        $("#pub_ok").on("click", function(){
+            $.ajax({
+                dataType: "json",
+                url: rel,
+                data: {id: id}
+            }).done(function(data){
+                if(data.success == 1) {
+                    $("#delBox").removeClass("open");
+                    currentRow.fadeOut(500, function(){currentRow.remove();});
+                    $(".pull-right>.pagination").detach();
+                    $(".table-responsive").after(data.pagination);
+                    setTimeout( function() {
+                        $('.badge.badge-primary').text(data.vCount);
+                        $(".table>tbody").html(data.table);
+                    }, 800);
+                }
+            }).fail(function() {
+                alert("error");
+            });
+        });
     });
 
     $("#btn_menu_trigger").on('click', function() {

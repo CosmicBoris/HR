@@ -46,7 +46,7 @@ class WorkspaceModel extends Model
     }
     public function getCandidates($from = 0)
     {
-        $cs = $this->dbLink->GetCandidates($from);
+        $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
         if( !$cs && $from > 0 ){
             paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
             $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
@@ -109,7 +109,7 @@ class WorkspaceModel extends Model
         if($from != self::GET_ALL) $order .= "LIMIT ".paginationHelper::Limit().",".paginationHelper::$elementsPerPage;
 
         $result = $this->dbLink->ExecuteSql($sql.$order);
-        if(!$result) return false;
+        if(!$result) return $vacancies;
 
         $n = paginationHelper::Limit();
         foreach ($result as $obj){
@@ -150,6 +150,81 @@ class WorkspaceModel extends Model
     public function AddEvent($event)
     {
          return $this->dbLink->insert('events', $event)->RunQuery();
+    }
+    public function getEvents($start, $end)
+    {
+        $db    = new PDO('mysql:host=localhost;dbname=testdb;charset=utf8', 'username', 'password');
+        
+        $sql   = sprintf('SELECT * FROM events WHERE `datetime` BETWEEN %s and %s',
+            $db->quote(date('Y-m-d', $start)), $db->quote(date('Y-m-d', $end)));
+
+        $out = array();
+        foreach($db->query($sql) as $row) {
+            $out[] = array(
+                'id' => $row->id,
+                'title' => $row->name,
+                'url' => Helper::url($row->id),
+                'start' => strtotime($row->datetime) . '000',
+                'end' => strtotime($row->datetime_end) .'000'
+            );
+        }
+
+        echo json_encode(array('success' => 1, 'result' => $out));
+    }
+    
+    public function GenerateCandidatesTableContent($page, &$response)
+    {
+        $candidates = $this->getCandidates($page);
+
+        foreach( $candidates as $c ){
+            $c->btnInfo = htmlbuttonHelper::Form(
+                ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
+                    '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
+            );
+            $c->btnRemove = htmlbuttonHelper::Form(
+                ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
+                    '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
+            );
+        }
+
+        $ht = new htmltableHelper();
+        $response['table'] = $ht->BodyFromObj($candidates,
+            ['N', 'fullname', 'email', 'phone','assigned','btnInfo','btnRemove']
+        )->getTableBody();
+
+        $response['vCount'] = $this->CandidatesCount();
+        $response['pagination'] = paginationHelper::Form(
+            $response['vCount'], "/workspace/Candidates"
+        );
+    }
+    public function GenerateVacanciesTableContent($page, &$response)
+    {
+        $vacancies = $this->getVacancies($page);
+
+        foreach( $vacancies as $vac )
+        {
+            $vac->btnInfo = htmlbuttonHelper::Form(
+                ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
+                    '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
+            );
+            $vac->btnRemove = htmlbuttonHelper::Form(
+                ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
+                    '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
+            );
+            unset($vac->id);
+            unset($vac->user_id);
+            unset($vac->state);
+        }
+
+        $ht = new htmltableHelper();
+        $response['table'] = $ht->BodyFromObj($vacancies,
+            ['N','title', 'description', 'date_added', 'assigned','btnInfo','btnRemove']
+        )->getTableBody();
+
+        $response['vCount'] = $this->VacanciesCount();
+        $response['pagination'] = paginationHelper::Form(
+            $response['vCount'], "/workspace/Vacancies"
+        );
     }
 
     public function Delete($from, $id)

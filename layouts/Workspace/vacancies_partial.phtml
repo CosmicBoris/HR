@@ -26,7 +26,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row spacer">
     <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading-pure">
@@ -39,7 +39,7 @@
                 <div class="clearfix"></div>
             </div>
             <div class="table-responsive">
-                <table id="fvacancies" class="table table-bordered table-hover table-condensed">
+                <table id="fvacancies" class="table table-bordered table-hover table-condensed" data-del-ref="/workspace/DeleteVacancy">
                     <thead>
                     <tr>
                         <th class="text-center"><span>№</span></th>
@@ -84,21 +84,5 @@
 </div>
 
 <script>
-    $("#pub_ok").on("click", function(){
-        $.ajax({
-            dataType: "json",
-            url: '/super/delete/' + currentUser.id
-        }).done(function(data){
-            if(data['status'] == 1) {
-                $("#delBox").removeClass("open");
-                var tr = $(currentUser).closest('tr');
-                tr.fadeOut(600, function(){tr.remove();});
-                setTimeout(function() {
-                    GetAnswer(currentPage, 'wrap')
-                }, 1000);
-            }
-        }).fail(function() {
-            alert("error");
-        });
-    });
+    document.title = "Vacancies";
 </script>

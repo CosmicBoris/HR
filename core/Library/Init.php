@@ -13,10 +13,7 @@ class Init
     public function Init($obj)
     {
         foreach($obj as $key => $value)
-        {
-            if(property_exists($this, $key)){
+            if(property_exists($this, $key))
                 $this->$key = $value;
-            }
-        }
     }
 }

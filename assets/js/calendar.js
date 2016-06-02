@@ -162,7 +162,7 @@ if(!String.prototype.formatNum) {
 	};
 
 	var defaults_extended = {
-		first_day: 2,
+		first_day: 1,
 		week_numbers_iso_8601: false,
 		holidays: {
 			// January 1

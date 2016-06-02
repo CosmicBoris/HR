@@ -5,85 +5,7 @@
         <div class="slide_side">
             <div id="LContainer" class="container-fluid">
 
-                <div id="new_entry" class="paper_dialog">
-                    <div class="paper">
-                        <div class="box clearfix">
-                            <h3>new event</h3>
-                            <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
-                            <div class="clearfix"></div>
-                            <hr>
-                            <div class="form-group text-center">
-                                <form id="form_new_entry" action="/workspace/Events" method="POST">
-                                    <span id="warnings" class="text-danger"></span>
-                                    <p><input class="field" type="text" name="title" placeholder="Title"></p>
-
-                                    <label for="form_datetime">Beginning at:</label>
-                                    <p>
-                                        <input size="16" type="text" name="start" readonly class="form_datetime field">
-                                    </p>
-
-                                    <label for="form_datetime">End at:</label>
-                                    <p>
-                                        <input size="16" type="text" name="end" readonly class="form_datetime field">
-                                    </p>
-
-                                    <label for="vacancy_id">Assign vacancy:</label>
-                                    <select class="form-control _select" name="vacancy_id">
-                                        <option value="0">None</option>
-                                        <?=htmlselectHelper::Form($this->vacancies, 'id', 'title')?>
-                                    </select>
-
-                                    <label for="candidate_id">Assign candidate:</label>
-                                    <select class="form-control _select" name="candidate_id">
-                                        <option value="0">None</option>
-                                        <?=htmlselectHelper::Form($this->users, 'id', 'fullname')?>
-                                    </select>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-3 col-xs-6">
-                        <div class="clr">
-                            <div>
-                                <h3>Interviews</h3>
-                                <p id="s1_data"></p>
-                                <button id="plus_one" class="button button--rayen bdr-white" data-text="+1"><span>Add new</span></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
-                        <div class="clr">
-                            <div>
-                                <h3>Hired:</h3>
-                                <p id="s2_data"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
-                        <div class="clr">
-                            <div>
-                                <h3>Rejected:</h3>
-                                <p id="sd_size"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
-                        <div class="clr">
-                            <div id="heap_info">
-                                <h3>Results:</h3>
-                                <p></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-10 col-md-offset-1">
-                        <div id="calendar"></div>
-                    </div>
-                </div>
+<?include_once Config::LAYOUT_DIR.Router::getControllerName(0)."/events_partial".Config::LAYOUT_TYPE;?>
 
             </div>
         </div>
@@ -94,15 +16,3 @@
         </div>
     </div>
 </div>
-
-<script>
-
-    $(".form_datetime").datetimepicker({
-        format: "dd-MM-yyyy hh:ii",
-        autoclose: true,
-        todayBtn: true,
-        minuteStep: 10
-    });
-
-    var calendar = $('#calendar').calendar({events_source: '/workspace/Feed'});
-</script>

@@ -299,7 +299,7 @@ final class DbHelper {
 		if($from != -1) $sql.="LIMIT $from,".paginationHelper::$elementsPerPage;
 
 		$result = $this->_db->query($sql);
-		if(!$result || $result->num_rows == 0) return false;
+		if(!$result || $result->num_rows == 0) return [];
 		
 		$candidates = array();
 

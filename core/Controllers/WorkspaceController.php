@@ -10,16 +10,15 @@ class WorkspaceController extends Controller
     public function __construct()
     {
         parent::__construct();
-        if(Auth::isAdmin()) {
+        if(Auth::IsAdmin()) {
             header("Location: /super");
             exit();
-        }
-        else if(!Auth::IsLogged()){
+        } else if(!Auth::IsLogged()){
             header("Location: /login");
             die();
         }
         $this->_model = new workspaceModel();
-        $this->_view->SetTitle('My workspace');
+        paginationHelper::setCurrentPage((int)$_GET['page']);
     }
     public function actionIndex()
     {
@@ -51,19 +50,23 @@ class WorkspaceController extends Controller
     }
     public function actionFeed()
     {
-        $start = date('Y-m-d h:i:s', ($_GET['start'] / 1000));
-        $end = microtime();
-        echo '{"success": 1,"result": [{"id": 293,"title": "Event 1","url": "http://example.com","class": "event-important","start": '.$end.'"end":'. $end.'}]}';
+        /*$start = $_REQUEST['from'] / 1000;
+        $end   = $_REQUEST['to']   / 1000;
+
+        $events = $this->_model->getEvents($start, $end);
+        Response::ReturnJson($events);*/
+
+
+        
     }
 
     public function actionCandidates()
     {
-        paginationHelper::setCurrentPage((int)$_GET['page']);
-        $this->_view->candidates = $this->_model->getCandidates(paginationHelper::Limit());
+
+        $this->_view->candidates = $this->_model->getCandidates(paginationHelper::getCurrentPage());
         $this->_view->vCount = $this->_model->CandidatesCount();
         $this->_view->vacancies = $this->_model->getVacancies(-1);
 
-        $this->_view->SetTitle('Candidates');
         if($this->isAjax())
             $this->_view->partialRender();
         else
@@ -120,12 +123,10 @@ class WorkspaceController extends Controller
 
     public function actionVacancies()
     {
-        paginationHelper::setCurrentPage((int)$_GET['page']);
         $this->_view->users = $this->_model->getCandidates(-1);
         $this->_view->vCount = $this->_model->VacanciesCount();
-        $this->_view->vacancies = $this->_model->getVacancies($this->_view->page);
-            
-        $this->_view->SetTitle('Vacancies');
+        $this->_view->vacancies = $this->_model->getVacancies(paginationHelper::getCurrentPage());
+
         if($this->isAjax())
             $this->_view->partialRender();
         else
@@ -218,8 +219,22 @@ class WorkspaceController extends Controller
         }*/
     }
 
-    public function actionDelete()
+    public function actionDeleteCandidate()
     {
-        Response::ReturnJson($this->_model->Delete($_GET['table'], $_GET['id']));
+        $response = $this->_model->Delete('candidates', $_GET['id']);
+        if($response['success'] == 1){
+            $this->_model->GenerateCandidatesTableContent(paginationHelper::getCurrentPage(), $response);
+        }
+
+        Response::ReturnJson($response);
+    }
+    public function actionDeleteVacancy()
+    {
+        $response = $this->_model->Delete('vacancies', $_GET['id']);
+        if($response['success'] == 1){
+            $this->_model->GenerateVacanciesTableContent(paginationHelper::getCurrentPage(), $response);
+        }
+
+        Response::ReturnJson($response);
     }
 }
