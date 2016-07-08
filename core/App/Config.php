@@ -21,8 +21,8 @@ class Config
 
     //TsjgffcNoNCKoMO6XO
     /*const DB_HOST = 'mysql.hostinger.com.ua';
-    const DB_USER = 'u635387968_root';
-    const DB_NAME = 'u635387968_insp';
+    const DB_USER = 'u635387968_hr';
+    const DB_NAME = 'u635387968_hr';
     const CORE_FOLDER = '/home/u635387968/public_html/core/';
     const LIB_FOLDER = '/home/u635387968/public_html/core/Library/';
     const CONTROLLERS_DIR = "/home/u635387968/public_html/core/Controllers/";

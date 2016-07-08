@@ -180,7 +180,7 @@ function GetAnswer(url, callBackElementId)
     };
     loadingScreen(true);
 
-    xmlhttp.open("GET", (url.contains('?')) ? url+'&ajax' : url+'?ajax', true);
+    xmlhttp.open("GET", (url.indexOf('?')) ? url+'&ajax' : url+'?ajax', true);
     try {
         xmlhttp.send();
 
