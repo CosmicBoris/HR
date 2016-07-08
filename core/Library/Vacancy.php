@@ -6,7 +6,7 @@
  * Date: 08.05.2016
  * Time: 18:06
  */
-class Vacancy extends Init implements IteratorAggregate
+class Vacancy extends Init
 {
     public $id;
     public $user_id;
@@ -20,9 +20,5 @@ class Vacancy extends Init implements IteratorAggregate
         parent::__construct();
         if($obj)
             $this->Init($obj);
-    }
-    public function getIterator()
-    {
-        return new ArrayIterator($this);
     }
 }

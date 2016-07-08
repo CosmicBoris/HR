@@ -39,10 +39,14 @@ $(document).ready(function()
         .on('click', "#new_entry", function(evn) {
         if(evn.target == this) {
             $(this).removeClass('open');
-            $("input[data-role='tagsinput']").tagsinput('removeAll');
+            var inputs = $("input[data-role='tagsinput']");
+            if(inputs.length > 0) {
+                inputs.tagsinput('removeAll');
+            }
         }
             // New entry to database
-    }).on('click',"#btnAdd", function(){
+    })
+        .on('click',"#btnAdd", function(){
         $.ajax(
             {
                 type: 'POST',
@@ -66,7 +70,8 @@ $(document).ready(function()
                 alert("error");
             });
 // DELETE button on table row
-    }).on('click','table .btn[data-action="delete"]', function(e){
+    })
+        .on('click','table .btn[data-action="delete"]', function(e){
         e.preventDefault();
         var id = this.id;
 

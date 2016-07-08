@@ -37,7 +37,7 @@ final class DbHelper {
 	 * @param bool|false $mod, (we need '$var' in some cases)
 	 * @return string
 	 */
-	private function GetSafeStr($data, $mod = false)
+	public function GetSafeStr($data, $mod = false)
 	{
 		if(is_array($data)) {
 			$temp_arr = array();
@@ -155,7 +155,6 @@ final class DbHelper {
 		}
 		return $this;
 	}
-
 	/**
 	 * @param array $params
 	 * @param string $comparison (=, LIKE, IS, etc...)
@@ -175,8 +174,10 @@ final class DbHelper {
 						.$this->GetSafeStr($keys[1])
 						.$comparison
 						.$this->GetSafeStr($value, true).' '.$condition.' ';
-				} else {
+				}else if (is_string($field)){
 					$this->_sql .= $this->GetSafeStr($field).$comparison.$this->GetSafeStr($value, true).' '.$condition.' ';
+				} else {
+					$this->_sql .= $this->GetSafeStr($value, true).' '.$condition.' ';
 				}
 			}
 			// remove last condition operator | WHERE id=5 AND name='Alisa' `AND`(remove)
@@ -284,7 +285,6 @@ final class DbHelper {
 		}
 		return false;
 	}
-
 	function GetCandidates($from)
 	{
 		$sql = "SELECT `id`,`fullname`,`sex`,`age`,`profile`,`email`,`phone`,`photo`,`skills`,"
@@ -303,7 +303,7 @@ final class DbHelper {
 		
 		$candidates = array();
 
-		while ($obj = $result-> fetch_assoc()) {
+		while ($obj = $result->fetch_assoc()) {
 			$candidate = new Candidate($obj);
 			$candidate->N = (int)++$from;
 			$candidate->assigned = $obj['assigned'];
@@ -327,33 +327,6 @@ final class DbHelper {
 		}
 		return $candidate;
 	}
-	function FindCandidate(Candidate $c)
-	{
-		$sql = 'SELECT '.$this->GetSafeStr(array_keys(get_object_vars($c))).' FROM `candidates` '
-				.'LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id` '
-				.'WHERE `uc`.`user_id`='.Auth::GetUserID().' AND ';
-		$sql2 ="";
-		if(!empty($c->email))
-			$sql2 = '`candidates`.`email`='.$this->GetSafeStr($c->email, true).' ';
-		if(!empty($c->profile)){
-			if(!empty($sql2))
-				$sql2 .= 'OR ';
-			$sql2 .= '`candidates`.`profile`='.$this->GetSafeStr($c->profile, true).' ';
-		}
-		if(!empty($c->phone)){
-			if(!empty($sql2))
-				$sql2 .= 'OR ';
-			$sql2 .= '`candidates`.`phone`='.$this->GetSafeStr($c->phone, true).' ';
-		}
-		if(!empty($c->fullname)){
-			if(!empty($sql2))
-				$sql2 .= 'OR ';
-			$sql2 .= '`candidates`.`fullname`='.$this->GetSafeStr($c->fullname, true).' ';
-		}
-
-		return $this->ExecuteSql($sql.$sql2);
-	}
-
 	function DeleteUser($uid)
 	{
 		$sql = 'DELETE FROM `user` WHERE `id`='.$uid;

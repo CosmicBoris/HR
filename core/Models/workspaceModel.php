@@ -56,22 +56,45 @@ class WorkspaceModel extends Model
     }
     public function FindCandidate(Candidate $c)
     {
-        $candidate = new Candidate($this->dbLink->FindCandidate($c));
-        if($candidate) {
-            $par = array();
+        $sql = 'SELECT '.$this->dbLink->GetSafeStr(array_keys(get_object_vars($c))).' FROM `candidates` '
+            .'LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id` '
+            .'WHERE `uc`.`user_id`='.Auth::GetUserID().' AND ';
+        $sql2 ="";
+        if(!empty($c->email))
+            $sql2 = '`candidates`.`email`='.$this->dbLink->GetSafeStr($c->email, true).' ';
+        if(!empty($c->profile)){
+            if(!empty($sql2))
+                $sql2 .= 'OR ';
+            $sql2 .= '`candidates`.`profile`='.$this->dbLink->GetSafeStr($c->profile, true).' ';
+        }
+        if(!empty($c->phone)){
+            if(!empty($sql2))
+                $sql2 .= 'OR ';
+            $sql2 .= '`candidates`.`phone`='.$this->dbLink->GetSafeStr($c->phone, true).' ';
+        }
+        if(!empty($c->fullname)){
+            if(!empty($sql2))
+                $sql2 .= 'OR ';
+            $sql2 .= '`candidates`.`fullname`='.$this->dbLink->GetSafeStr($c->fullname, true).' ';
+        }
+        $result = $this->dbLink->ExecuteSql($sql.$sql2);
+
+        if($result) {
+            $candidate = new Candidate($result);
+            $warnings = array();
 
             if($candidate->fullname == $c->fullname)
-                $par[] = "Name in Base";
+                $warnings[] = "Name in Base";
             if($candidate->phone == $c->phone)
-                $par[] = "Phone in Base";
+                $warnings[] = "Phone in Base";
             if($candidate->profile == $c->profile)
-                $par[] = "Profile in Base";
+                $warnings[] = "Profile in Base";
             if($candidate->email == $c->email)
-                $par[] = "Email in Base";
+                $warnings[] = "Email in Base";
 
-            return implode(', ', $par);
+            return implode(', ', $warnings);
         }
-        return 0;
+        return null;
     }
 
     public function AddVacancy($vacancy, $candidate_id)
@@ -94,6 +117,23 @@ class WorkspaceModel extends Model
             ->where(['user_id'=>Auth::GetUserID()])
             ->RunQuery()->num_rows;
     }
+    public function PrepareRow($data, &$rows)
+    {
+        $n = paginationHelper::Limit();
+        if(is_array($data) && is_array($data[0])) {
+            foreach ($data as $obj){
+                $v = new Vacancy($obj);
+                $v->N = (int)++$n;
+                $v->assigned = $obj['assigned'];
+                $rows[] = $v;
+            }
+        } else if (is_array($data)){
+            $v = new Vacancy($data);
+            $v->N = (int)++$n;
+            $v->assigned = $data['assigned'];
+            $rows[] = $v;
+        }
+    }
     public function getVacancies($from = 0, $searchStr = false)
     {
         $sql = "SELECT `id`,`user_id`,`title`,`state`,`date_added`,`description`, "
@@ -111,13 +151,7 @@ class WorkspaceModel extends Model
         $result = $this->dbLink->ExecuteSql($sql.$order);
         if(!$result) return $vacancies;
 
-        $n = paginationHelper::Limit();
-        foreach ($result as $obj){
-            $v = new Vacancy($obj);
-            $v->N = (int)++$n;
-            $v->assigned = $obj['assigned'];
-            $vacancies[] = $v;
-        }
+        $this->PrepareRow($result, $vacancies);
         
         if(count($vacancies) == 0 && $from > 0) {
             paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
@@ -126,13 +160,7 @@ class WorkspaceModel extends Model
             $result = $this->dbLink->ExecuteSql(($from != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
             if(!$result) return false;
 
-            $n = paginationHelper::Limit();
-            foreach ($result as $obj){
-                $v = new Vacancy($obj);
-                $v->N = (int)++$from;
-                $v->assigned = $obj['assigned'];
-                $vacancies[] = $v;
-            }
+            $this->PrepareRow($result, $vacancies);
         }
         return $vacancies;
     }
@@ -144,32 +172,30 @@ class WorkspaceModel extends Model
         if($result->num_rows > 0){
             return 'Vacancy with such title exists!';
         }
-        return 0;
+        return null;
     }
     
     public function AddEvent($event)
     {
          return $this->dbLink->insert('events', $event)->RunQuery();
     }
-    public function getEvents($start, $end)
+    public function getEvents($start, $end,array &$out)
     {
-        $db    = new PDO('mysql:host=localhost;dbname=testdb;charset=utf8', 'username', 'password');
-        
-        $sql   = sprintf('SELECT * FROM events WHERE `datetime` BETWEEN %s and %s',
-            $db->quote(date('Y-m-d', $start)), $db->quote(date('Y-m-d', $end)));
+        $event = new Event();
+        $result = $this->dbLink->select('events', array_keys(get_object_vars($event)))
+            ->where(['start'=>$start, $end], 'BETWEEN','AND')
+            ->RunQuery();
 
-        $out = array();
-        foreach($db->query($sql) as $row) {
-            $out[] = array(
-                'id' => $row->id,
-                'title' => $row->name,
-                'url' => Helper::url($row->id),
-                'start' => strtotime($row->datetime) . '000',
-                'end' => strtotime($row->datetime_end) .'000'
-            );
+        if(!$result) return 0;
+
+        while($obj = $result->fetch_assoc()){
+            $event = new Event($obj);
+            /*$event->start = strtotime($obj['start']) . '000';
+            $event->end   = strtotime($obj['end']) .'000';*/
+            $out[] = $event;
         }
 
-        echo json_encode(array('success' => 1, 'result' => $out));
+        return 1;
     }
     
     public function GenerateCandidatesTableContent($page, &$response)

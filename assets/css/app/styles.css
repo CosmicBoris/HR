@@ -42,7 +42,6 @@ h3.info {
     font-weight: 300;
 }
 
-
 .panel{
     border-radius: 0;
     border-top-color: white;
@@ -474,7 +473,6 @@ h3.info {
     color: #000;
 }
 
-
 /*Toggle switch Begin*/
 .switch{ /**/
     border: 1px solid #fbfbfb;
@@ -678,6 +676,17 @@ input.field {
     height: 31px;
     width: 280px;
 }
+textarea.field {
+    font-family: 'Roboto Condensed', sans-serif;
+    border: 1px solid #9f9f9f;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 0;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 280px;
+    max-width: 90%;
+}
 select._select{
     margin: auto;
     left:50%;
@@ -818,8 +827,8 @@ select._select{
 }
 .button--material.active{
     background-color: #f3f3f3;
-    border: none;
-    border-top: 1px solid #fff;
+    border: 1px solid #fcfcfc;
+    border-bottom-width: 0;
     box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
@@ -1057,9 +1066,11 @@ select._select{
     padding: 5px 10px;
     border-bottom: 1px solid transparent;
 }
-
+.event-interview{
+    background-color: #1b6d85;
+}
 /* Example for media query (depends on total height of menu) */
-@media screen and (max-height: 34.9375em){  }
+/*lower size at bottom*/
 @media screen and (max-width: 48em){
     .slide_side {
         border: none;
@@ -1085,5 +1096,33 @@ select._select{
         transition-delay: 0.5s;
         -webkit-transition: all 0.5s cubic-bezier(1,-0.35,.59,1.23);
         transition: all 0.5s cubic-bezier(1,-0.35,.59,1.23);
+    }
+}
+@media screen and (max-height: 34.9375em) {}
+
+
+@media screen and (max-width: 480px){
+    .paper_dialog.open > .paper{
+        -webkit-transform: translateY(55px);
+        -moz-transform: translateY(55px);
+        -ms-transform: translateY(55px);
+        -o-transform: translateY(55px);
+        transform: translateY(55px);
+        width: 98%;
+    }
+    .button--rayen.button--size-s{
+        position: absolute;
+        top: 15px;
+        right: 20px;
+    }
+    .clr{
+        height: 4em;
+    }
+    .clr h3{
+        font-size: 1.5em;
+    }
+    .calender-title, .fc-toolbar{
+        display: inline-block;
+        width: 100%;
     }
 }

@@ -5,7 +5,7 @@
  * Date: 30.12.2015
  * Time: 13:15
  */
-class Validator // vse proverki tut
+final class Validator // vse proverki tut
 {
     protected static $_instance = null;
     private $_data;

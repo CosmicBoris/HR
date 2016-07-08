@@ -57,6 +57,7 @@ class paginationHelper
     }
     /**
      * @param integer $newPage
+     * Call this from controller constructor (int)$_GET['page']
      */
     public static function setCurrentPage($newPage)
     {

@@ -30,13 +30,14 @@ class WorkspaceController extends Controller
         if($this->isPost()) {
             $response = array();
             $event = new Event($_POST);
+            $event->class = $event->event_type;
+            $event->className = $event->event_type;
             $event->start = date("Y-m-d H:i:s", strtotime($event->start));
             $event->end = date("Y-m-d H:i:s", strtotime($event->end));
             $response['success'] = $this->_model->AddEvent($event);
             
             Response::ReturnJson($response);
         } else {
-            $this->_view->page = $_GET['page'];
             $this->_view->vacancies = $this->_model->getVacancies(-1);
             $this->_view->users = $this->_model->getCandidates();
 
@@ -50,14 +51,19 @@ class WorkspaceController extends Controller
     }
     public function actionFeed()
     {
-        /*$start = $_REQUEST['from'] / 1000;
-        $end   = $_REQUEST['to']   / 1000;
+        $events = array();
+        //$events['result'] = array();
+        if(isset($_GET['from'])){
+            $start = $_REQUEST['from'] / 1000;
+            $end   = $_REQUEST['to']   / 1000;
+            //$events['success'] = $this->_model->getEvents(date('Y-m-d', $start), date('Y-m-d', $end), $events['result']);
+        } else {
+            $start = $_REQUEST['start'];
+            $end   = $_REQUEST['end'];
+            $this->_model->getEvents($start, $end, $events);
+        }
 
-        $events = $this->_model->getEvents($start, $end);
-        Response::ReturnJson($events);*/
-
-
-        
+        Response::ReturnJson($events);
     }
 
     public function actionCandidates()
@@ -77,44 +83,48 @@ class WorkspaceController extends Controller
         if($this->isPost()) {
             $response = array();
             $validator = Validator::GetInstance();
-            $validator->Prepare($_POST);
-            if($validator->CheckEmail('email'))
-            {
-                $candidate = new Candidate($validator->GetAllFields());
-
-                if(!$response['warning'] = $this->_model->FindCandidate($candidate))
+            $validator->Prepare($_POST, ["fullname", "phone", "age", "skills", "sex"])->CheckForEmpty();
+            if(!$validator->IsError()){
+                if($validator->CheckEmail('email'))
                 {
-                    if($this->_model->AddCandidate($candidate, $_POST['vacancy_id'])) {
-                        $response['success'] = 1;
+                    $candidate = new Candidate($validator->GetAllFields());
 
-                        $candidates = $this->_model->getCandidates(0);
+                    if(!$response['warning'] = $this->_model->FindCandidate($candidate))
+                    {
+                        if($this->_model->AddCandidate($candidate, $_POST['vacancy_id'])) {
+                            $response['success'] = 1;
 
-                        foreach( $candidates as $c ){
-                            $c->btnInfo = htmlbuttonHelper::Form(
-                                ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
-                                    '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
+                            $candidates = $this->_model->getCandidates(0);
+
+                            foreach( $candidates as $c ){
+                                $c->btnInfo = htmlbuttonHelper::Form(
+                                    ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
+                                        '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
+                                );
+                                $c->btnRemove = htmlbuttonHelper::Form(
+                                    ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
+                                        '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
+                                );
+                            }
+
+                            $ht = new htmltableHelper();
+                            $response['table'] = $ht->BodyFromObj($candidates,
+                                ['N', 'fullname', 'email', 'phone','assigned','btnInfo','btnRemove']
+                            )->getTableBody();
+
+                            $response['vCount'] = $this->_model->CandidatesCount();
+                            $response['pagination'] = paginationHelper::Form(
+                                $response['vCount'], "/workspace/Candidates"
                             );
-                            $c->btnRemove = htmlbuttonHelper::Form(
-                                ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
-                                    '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
-                            );
+                        } else {
+                            $response['error'] = $this->_model->getDBError();
                         }
-
-                        $ht = new htmltableHelper();
-                        $response['table'] = $ht->BodyFromObj($candidates,
-                            ['N', 'fullname', 'email', 'phone','assigned','btnInfo','btnRemove']
-                        )->getTableBody();
-
-                        $response['vCount'] = $this->_model->CandidatesCount();
-                        $response['pagination'] = paginationHelper::Form(
-                            $response['vCount'], "/workspace/Candidates"
-                        );
-                    } else {
-                        $response['error'] = $this->_model->getDBError();
                     }
-                }
+                } else {
+                    $response['warning'] = "E-mail not correct!";
+                }    
             } else {
-                $response['warning'] = "E-mail not correct!";
+                $response['warning'] = "Empty fields: " . implode(', ', $validator->GetErrors()['empty']);
             }
 
             Response::ReturnJson($response);
@@ -147,7 +157,6 @@ class WorkspaceController extends Controller
                 if(!$response['warning'] = $this->_model->FindVacancy($vacancy)) {
                     if($this->_model->AddVacancy($vacancy, $_POST['candidate_id'])) {
                         $response['success'] = 1;
-
                         $vacancies = $this->_model->getVacancies(0);
 
                         foreach( $vacancies as $vac )
@@ -167,7 +176,7 @@ class WorkspaceController extends Controller
 
                         $ht = new htmltableHelper();
                         $response['table'] = $ht->BodyFromObj($vacancies,
-                            ['title', 'description', 'date_added', 'assigned','btnInfo','btnRemove']
+                            ['N','title','description','date_added','assigned','btnInfo','btnRemove']
                         )->getTableBody();
 
                         $response['vCount'] = $this->_model->VacanciesCount();
