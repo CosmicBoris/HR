@@ -5,13 +5,11 @@ var mouseStartX, mouseEndX, nInterval;
 $(document).ready(function()
 {
     $(document).keyup(function(event){
-        if(event.which=='37'){
-            $('.innerWrap').removeClass('innerShift');
-        } else if (event.which=='39'){
-            $('.innerWrap').addClass('innerShift');
-        } else if(event.which=='27') { // esc keyboard button
+        if(event.which=='27') { // esc keyboard button
             
-        } else if(event.which=='13'){}
+        } else if(event.which=='13'){
+            
+        }
     }).on('click','.pageAct', function(e){
         if($("#searchbox").length && $("#searchbox").val().length > 2) {
             JsonSearchResult(this);
@@ -108,9 +106,9 @@ $(document).ready(function()
         $("#menu").toggleClass("open");
     });
 
-    $( ".topLeftCenter" ).on( "mouseup", MouseMove).on( "mousedown", function(event){
+    /*$( ".topLeftCenter" ).on( "mouseup", MouseMove).on( "mousedown", function(event){
         mouseStartX = event.clientX;
-    });
+    });*/
 
     $("#menu").on('click', function(event) {
         if(event.target != this) {
@@ -180,7 +178,7 @@ function GetAnswer(url, callBackElementId)
     };
     loadingScreen(true);
 
-    xmlhttp.open("GET", (url.contains('?')) ? url+'&ajax' : url+'?ajax', true);
+    xmlhttp.open("GET", (url.indexOf('?')) ? url+'&ajax' : url+'?ajax', true);
     try {
         xmlhttp.send();
 
