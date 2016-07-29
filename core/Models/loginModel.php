@@ -28,8 +28,4 @@ class LoginModel extends Model
         }
         return $user;
     }
-    public function IsAuthorized($id)
-    {
-        return $this->dbLink->IsAuthentic($id);
-    }
 }

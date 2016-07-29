@@ -15,46 +15,59 @@ class WorkspaceModel extends Model
         parent::__construct();
     }
 
-    public function AddCandidate($candidate, $vacancy_id)
+    function AddCandidate($candidate, $vacancy_id)
     {
         $this->dbLink->autocommit(FALSE);
 
         $result = $this->dbLink->insert('candidates', $candidate)->RunQuery();
         $candidate_id = $this->dbLink->lastInsertedId();
-        if($result) {
+        if($result)
+        {
             $result = $this->dbLink->insert('user_candidates',
                 ['user_id'=>Auth::GetUserID(), 'candidate_id'=>$candidate_id])->RunQuery();
         }
-        if($vacancy_id && $result) {
-            $result = $this->dbLink->insert('vacancies_candidates',
-                ['vacancy_id'=>$vacancy_id, 'candidate_id'=>$candidate_id])->RunQuery();
-        }
+        if($vacancy_id && $result)
+            $result = $this->AssingVacancy($vacancy_id, $candidate_id);
 
         $this->dbLink->commit();
         return $result;
     }
-    public function CandidatesCount()
+    function UpdateCandidate(Candidate $c)
+    {
+        return $this->dbLink->update('candidates',
+            [
+                "fullname"=>$c->fullname,
+                "sex"=>$c->sex,
+                "age"=>$c->age,
+                "profile"=>$c->profile,
+                "email"=>$c->email,
+                "phone"=>$c->phone,
+                "skills"=>$c->skills
+            ])
+            ->where(['id' => $c->id])->RunQuery();
+    }
+
+    function CandidatesCount()
     {
         return $this->dbLink->select('candidates', 'id')
             ->innerJoin('user_candidates', ['id'=>'candidate_id'])
             ->where(['user_id'=>Auth::GetUserID()])
             ->RunQuery()->num_rows;
     }
-    public function getCandidate($id)
+    function getCandidate($id)
     {
         return $this->dbLink->GetCandidate($id);
     }
-    public function getCandidates($from = 0)
+    function getCandidates($from = 0)
     {
         $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
         if( !$cs && $from > 0 ){
             paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
             $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
         }
-
         return $cs;
     }
-    public function FindCandidate(Candidate $c)
+    function FindCandidate(Candidate $c)
     {
         $sql = 'SELECT '.$this->dbLink->GetSafeStr(array_keys(get_object_vars($c))).' FROM `candidates` '
             .'LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id` '
@@ -96,8 +109,13 @@ class WorkspaceModel extends Model
         }
         return null;
     }
+    function AssingVacancy($vacancy_id, $candidate_id)
+    {
+        return $this->dbLink->insert('vacancies_candidates',
+            ['vacancy_id'=>$vacancy_id, 'candidate_id'=>$candidate_id])->RunQuery();
+    }
 
-    public function AddVacancy($vacancy, $candidate_id)
+    function AddVacancy($vacancy, $candidate_id)
     {
         $this->dbLink->autocommit(FALSE);
 
@@ -112,12 +130,12 @@ class WorkspaceModel extends Model
         $this->dbLink->commit();
         return $result;
     }
-    public function VacanciesCount(){
+    function VacanciesCount(){
         return $this->dbLink->select('vacancies', 'id')
             ->where(['user_id'=>Auth::GetUserID()])
             ->RunQuery()->num_rows;
     }
-    public function PrepareRow($data, &$rows)
+    function PrepareRow($data, &$rows)
     {
         $n = paginationHelper::Limit();
         if(is_array($data) && is_array($data[0])) {
@@ -134,7 +152,7 @@ class WorkspaceModel extends Model
             $rows[] = $v;
         }
     }
-    public function getVacancies($from = 0, $searchStr = false)
+    function getVacancies($from = 0, $searchStr = false)
     {
         $sql = "SELECT `id`,`user_id`,`title`,`state`,`date_added`,`description`, "
             ."COUNT(`vc`.`vacancy_id`) AS `assigned` "
@@ -164,7 +182,25 @@ class WorkspaceModel extends Model
         }
         return $vacancies;
     }
-    public function FindVacancy(Vacancy $v)
+    function GetAssignedVacancies(int $candidateId)
+    {
+        $result = $this->dbLink->select('vacancies_candidates',
+            ['id', 'user_id', 'title', 'state', 'date_added', 'description'])
+            ->innerJoin('vacancies', ['vacancy_id'=>'id'])
+            ->where(['user_id'=>Auth::GetUserID(), "state" => "1"], "=", "AND")
+            ->RunQuery();
+
+        $vacancies = [];
+        if ($result !== false) {
+            while ($obj = $result->fetch_assoc()) {
+                $vac = new Vacancy($obj);
+                $vacancies[]= $vac;
+            }
+        }
+        return $vacancies;
+    }
+
+    function FindVacancy(Vacancy $v)
     {
         $result = $this->dbLink->select('vacancies', array_keys(get_object_vars($v)))
             ->where(['title'=>$v->title])
@@ -175,11 +211,11 @@ class WorkspaceModel extends Model
         return null;
     }
     
-    public function AddEvent($event)
+    function AddEvent($event)
     {
          return $this->dbLink->insert('events', $event)->RunQuery();
     }
-    public function getEvents($start, $end,array &$out)
+    function getEvents($start, $end, array &$out)
     {
         $event = new Event();
         $result = $this->dbLink->select('events', array_keys(get_object_vars($event)))
@@ -198,7 +234,7 @@ class WorkspaceModel extends Model
         return 1;
     }
     
-    public function GenerateCandidatesTableContent($page, &$response)
+    function GenerateCandidatesTableContent($page, &$response)
     {
         $candidates = $this->getCandidates($page);
 
@@ -223,12 +259,13 @@ class WorkspaceModel extends Model
             $response['vCount'], "/workspace/Candidates"
         );
     }
-    public function GenerateVacanciesTableContent($page, &$response)
+    function GenerateVacanciesTableContent($page, &$response)
     {
         $vacancies = $this->getVacancies($page);
 
         foreach( $vacancies as $vac )
         {
+            $vac->state = $vac->state ? "Open" : "Closed";
             $vac->btnInfo = htmlbuttonHelper::Form(
                 ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
                     '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
@@ -239,12 +276,11 @@ class WorkspaceModel extends Model
             );
             unset($vac->id);
             unset($vac->user_id);
-            unset($vac->state);
         }
 
         $ht = new htmltableHelper();
         $response['table'] = $ht->BodyFromObj($vacancies,
-            ['N','title', 'description', 'date_added', 'assigned','btnInfo','btnRemove']
+            ['N','title', 'description', 'date_added', 'assigned','state','btnInfo','btnRemove']
         )->getTableBody();
 
         $response['vCount'] = $this->VacanciesCount();
@@ -253,17 +289,15 @@ class WorkspaceModel extends Model
         );
     }
 
-    public function Delete($from, $id)
+    function Delete($from, $id)
     {
-        $result = array();
+        $result = [];
 
         if($this->dbLink->delete($from)->where(['id'=>$id])->RunQuery()){
             $result['success'] = 1;
         } else {
-            $result['success'] = 0;
             $result['error'] = $this->dbLink->getErrors();
         }
-
         return $result;
     }
 }

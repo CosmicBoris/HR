@@ -17,7 +17,8 @@ class Candidate extends Init
         $email,
         $phone,
         $photo,
-        $skills;
+        $skills,
+        $date_added;
 
     public function __construct($obj = false)
     {

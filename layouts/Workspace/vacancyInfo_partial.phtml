@@ -1,0 +1,149 @@
+<div class="container-fluid">
+    <div id="Candidate_info">
+        <h2 class="info"><?=$this->candidate->fullname?></h2>
+
+        <?if(isset($_GET['ajax'])):?>
+            <button id="goBack" class="button button--rect button--size-m">
+                <span class="fc-icon fc-icon-left-single-arrow"></span><span>Back to list</span>
+            </button>
+        <?endif;?>
+
+    </div>
+
+    <div class="row spacer">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading-pure">
+                    <h4 class="header text-center">Candidate info:</h4>
+
+                    <div class="pull-right">
+                        <button id="btn_edit" class="button button--rayen button--size-s" data-text="Edit"><span class="glyphicon glyphicon-edit"></span></button>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <table id="t_info">
+                    <tbody>
+                    <tr>
+                        <td id="photo_container" rowspan="3">
+                            <div id="profile_photo">
+                                <img src="<?=$this->candidate->photo ?? "/assets/svg/no_photo.svg"?>">
+                            </div>
+                        </td>
+                        <td class="pad_l" >NAME:</td>
+                        <td data-name="name"><?=$this->candidate->fullname?></td>
+                    </tr>
+                    <tr>
+                        <td class="pad_l" >PHONE:</td>
+                        <td data-name="phone"><?=$this->candidate->phone?></td>
+                    </tr>
+                    <tr>
+                        <td class="pad_l" >EMAIL:</td>
+                        <td><a href="mailto:<?=$this->candidate->email?>" data-name="email"><?=$this->candidate->email?></a></td>
+                    </tr>
+                    <tr class="text-center">
+                        <td><a data-name="profile" href="<?=$this->candidate->profile ?? ""?>" target="_blank">Web profile</a></td>
+                    </tr>
+                    <tr class="text-center">
+                        <td data-name="age">AGE: <?=$this->candidate->age?></td>
+                        <td data-name="sex">GENDER: <?=$this->candidate->sex ? "Male" : "Female"?></td>
+                    </tr>
+                    <tr class="text-center">
+                        <td><span>SKILLS:</span></td>
+                        <td colspan="2">
+                            <input id="target_tag" data-role="tagsinput" type="text" value="<?=$this->candidate->skills?>">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading-pure">
+                    <h4 class="header text-center">Assigned vacancies:</h4>
+                    <div class="pull-right">
+                        <button  class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="scroll" data-height="220">
+                    <ul>
+                        <?php
+                        foreach ($this->assignedVacancies as $vacancy):
+                            ?>
+                            <li><ul>
+                                    <li><?=$vacancy->title?></li>
+                                    <li><?=$vacancy->description?></li>
+                                    <li><?=$vacancy->date_added?></li>
+                                    <li><?=$vacancy->assigned?></li>
+                                    <li><?=$vacancy->state ? "Yes" : "No"?></li>
+                                </ul></li>
+                            <?php
+                        endforeach;
+                        ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading-pure">
+                    <h4 class="header text-center">Timeline</h4>
+                    <div class="clearfix"></div>
+                </div>
+                date_added
+            </div>
+        </div>
+    </div>
+
+    <div id="edit_entry" class="paper_dialog">
+        <div id="editCandidate" class="paper">
+            <div class="box clearfix">
+                <h3>Edit</h3>
+                <input type="button" id="btnSaveCan" class="btn-add-trigger" value="Save">
+                <div class="clearfix"></div>
+                <h5></h5>
+                <hr>
+                <div class="form-group text-center">
+                    <form id="form_edit_entry" action="/workspace/EditCandidate" method="POST">
+                        <span id="warnings" class="text-danger"></span>
+                        <p><input class="field" type="text" name="fullname" placeholder="Name" maxlength="96" value="<?=$this->candidate->fullname?>"></p>
+
+                        <p><input class="field" type="text" name="phone" placeholder="10 digit phone number" maxlength="10" value="<?=$this->candidate->phone?>" ></p>
+
+                        <p><input class="field" type="text" name="email" placeholder="E-mail" maxlength="48" value="<?=$this->candidate->email?>"></p>
+
+                        <p><input class="field" type="text" name="profile" placeholder="Link to summary" value="<?=$this->candidate->profile?>"></p>
+
+                        <div class="form_input_size clearfix">
+                            <h4>Sex:</h4>
+
+                            <ul class="cd-form-list">
+                                <li>
+                                    <input type="radio" name="sex" id="cd-radio-1" value="1" <?=$this->candidate->sex == 1 ? "checked":"" ?>>
+                                    <label for="cd-radio-1">male</label>
+                                </li>
+
+                                <li>
+                                    <input type="radio" name="sex" id="cd-radio-2" value="2" <?=$this->candidate->sex == 0 ? "checked":"" ?>>
+                                    <label for="cd-radio-2">female</label>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <p><input class="field" type="number" min="14" max="90" name="age" placeholder="Age" value="<?=$this->candidate->age?>"></p>
+
+                        <label for="skills">Key skills:</label>
+                        <p><input id="source_tag" type="text" name="skills" data-role="tagsinput" value="<?=$this->candidate->skills?>"></p>
+
+                        <input name="id" value="<?=$this->candidate->id?>" hidden>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.title = "Candidate <?=$this->candidate->fullname?>";
+    </script>
+</div>

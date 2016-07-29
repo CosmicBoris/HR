@@ -12,17 +12,14 @@ class Model
     {
         return $this->dbLink->$action_name($param);
     }
-    public function getDBError(){
+    public function getDBError()
+    {
         return $this->dbLink->getErrors();
     }
     public function RowsCount()
     {
         return $this->dbLink->_rowsCount;
     }
-
-    /**
-     * @return mixed
-     */
     public function getError()
     {
         return $this->_error;

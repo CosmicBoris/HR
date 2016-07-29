@@ -4,6 +4,7 @@
             <h3>new event</h3>
             <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
             <div class="clearfix"></div>
+            <h5></h5>
             <hr>
             <div class="form-group text-center">
                 <form id="form_new_entry" action="/workspace/Events" method="POST">
@@ -38,13 +39,13 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row spacer">
     <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="clr">
             <div>
                 <h3>Interviews</h3>
                 <p id="s1_data"></p>
-                <button id="plus_one" class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
+                <button id="plus_one" class="button button--rayen button--size-s mob-right" data-text="+1"><span>Add new</span></button>
             </div>
         </div>
     </div>
@@ -74,7 +75,7 @@
     </div>
 </div>
 
-    <div class="row spacer">
+    <!--<div class="row spacer">
 
     <div class="col-md-3">
         <div class="panel panel-default">
@@ -108,27 +109,14 @@
                         <button class="button button--material button--size-xs" data-calendar-view="week">Week</button>
                         <button class="button button--material button--size-xs" data-calendar-view="day">Day</button>
                     </div>
-                </div><!--<div class="panel-heading clean clearfix text-center">
-                    <div class="btn-group pull-left">
-                        <button class="btn btn-default btn-sm" data-calendar-nav="prev">&lt;< Prev</button>
-                        <button class="btn btn-sm btn-default" data-calendar-nav="today">Today</button>
-                        <button class="btn btn-sm btn-default" data-calendar-nav="next">Next >&gt;</button>
-                    </div>
-                    <b class="calender-title"></b>
-                    <div class="btn-group pull-right">
-                        <button class="btn btn-sm btn-default" data-calendar-view="year">Year</button>
-                        <button class="btn btn-sm btn-default active" data-calendar-view="month">Month</button>
-                        <button class="btn btn-sm btn-default" data-calendar-view="week">Week</button>
-                        <button class="btn btn-sm btn-default" data-calendar-view="day">Day</button>
-                    </div>
-                </div>-->
+                </div>
 
                 <div id="calendar"></div>
 
             </div>
         </div>
     </div>
-</div>
+</div>-->
 
     <div class="row spacer">
 
@@ -168,12 +156,13 @@
         minuteStep: 10
     });
 
+    /**/
     $('#fullcalendar').fullCalendar({
         events: '/workspace/Feed',
         firstDay: 1,
         fixedWeekCount: false,
-        aspectRatio: 3,
-        contentHeight: 506,
+        aspectRatio: 2.1,
+
         header: {
             left: 'prev,today,next',
             center: 'title',
@@ -181,12 +170,12 @@
         }
     });
 
-    (function($) {
+    /*(function($) {
 
         "use strict";
 
         var options = {
-            events_source: '/workspace/Feed',
+            events_source: '/workspace/CalFeed',
             view: 'month',
             tmpl_cache: false,
             onAfterEventsLoad: function(events) {
@@ -252,7 +241,6 @@
         });
 
 
-
         $('.add-calendar-event').click(function(){
 
             var calendarEventName = $('.calendar-event-name').val();
@@ -273,17 +261,17 @@
                             <hr>')
             }
         });
-    }(jQuery));
+    }(jQuery));*/
 
 </script>
 <script type="text/javascript">
     $(function(){
-        $("document").slimScroll({
-            size: '8px',
+        $(".fc-day-grid.fc-unselectable").slimScroll({
+            size: '5px',
             width: '100%',
             height: '100%',
-            color: '#ff4800',
-            allowPageScroll: true,
+            color: '#626262',
+            allowPageScroll: false,
             alwaysVisible: true
         });
     });

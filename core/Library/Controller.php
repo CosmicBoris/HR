@@ -1,10 +1,11 @@
 <?php
 abstract class Controller
 {
-    protected $_model;
-    protected $_view;
-    protected $_storage;
-    protected $_errors;
+    protected
+        $_model,
+        $_view,
+        $_storage,
+        $_errors;
 
     public function __construct()
     {
@@ -17,21 +18,20 @@ abstract class Controller
 
     public function show404() // if user require non-existent action
     {
+        Response::ReturnCode(404);
         $this->_view->SetTitle('Page not found');
         $this->_view->render('nopage');
     }
 
-    /**Check if request was send using POST method
-     * @return bool
-     */
-    public function isPost()
+    public function isPost() : bool
     {
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             return true;
         }
         return false;
     }
-    public function isAjax(){
+    public function isAjax() : bool
+    {
         if(isset($_GET['ajax'])) return true;
         return false;
     }

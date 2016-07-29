@@ -46,7 +46,8 @@ class Router
      * @param $mod
      * @return mixed|string
      */
-    public static function getControllerName($mod) {
+    public static function getControllerName($mod) : string
+    {
         $name = "";
         if(!empty(self::$segments[0]))
             $name = self::$segments[0];
@@ -60,7 +61,8 @@ class Router
      * @param $mod(FULL_NAME|SHORT_NAME)
      * @return string
      */
-    public static function getActionName($mod) {
+    public static function getActionName($mod) : string
+    {
         $name = "";
         if(!empty(self::$segments[1]))
             $name = ucfirst(self::$segments[1]);

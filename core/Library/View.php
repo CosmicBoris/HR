@@ -7,13 +7,14 @@
  */
 class View
 {
-    protected $_title;
-    protected $_common_layout = Config::MAIN_LAYOUT;
-    protected $_page_content;
-    protected $_data;     // contains data for view
-    protected $_errors;
+    protected
+        $_title,
+        $_common_layout = Config::MAIN_LAYOUT,
+        $_page_content,
+        $_data,     // contains data for view
+        $_errors;
 
-    public function __construct($storage)
+    public function __construct(Storage $storage)
     {
         $this->_data = $storage;
     }
@@ -31,7 +32,7 @@ class View
         return $this->_data->has($name);
     }
 
-    public function SetTitle($title)
+    public function SetTitle(string $title)
     {
         $this->_title = $title;
     }
@@ -40,7 +41,14 @@ class View
      * @param string|bool $layout
      * @param string|bool $view
      */
-    public function render($layout = false, $view = false)
+    public function render(string $layout = "", string $view = "")
+    {
+        if(isset($_GET['ajax']))
+            $this->partialRender($layout);
+        else
+            $this->fullRender($layout, $view);
+    }
+    public function fullRender(string $layout = "", string $view = "")
     {
         if($layout) $this->_common_layout = $layout;
 
@@ -55,19 +63,18 @@ class View
         }
         catch(Exception $e) {}
     }
-    public function partialRender($layout = false)
+    public function partialRender(string $layout = null)
     {
-        $_view = Config::LAYOUT_DIR.Router::getControllerName(0).'/';
-        if($layout) $_view .= $layout;
-        else $_view .= lcfirst(Router::getActionName(0));
-        $_view .='_partial'.Config::LAYOUT_TYPE;
+        $_view = Config::LAYOUT_DIR.Router::getControllerName(0).'/'
+                .($layout ?? lcfirst(Router::getActionName(0)))
+                .'_partial'.Config::LAYOUT_TYPE;
 
         try {
             include_once $_view;
         } catch(Exception $e) {}
     }
 
-    public function SetPropertyArray($array)
+    public function SetPropertyArray(array $array)
     {
         foreach($array as $key => $value)
             $this->_data->$key = $value;

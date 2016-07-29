@@ -57,19 +57,20 @@ final class Validator // vse proverki tut
         if(!$field_name)return $this->_data;
         return null;
     }
-    public function CheckEmail($field)
+    public function CheckEmail(string $field)
     {
         return filter_var($this->GetField($field), FILTER_VALIDATE_EMAIL);
     }
     
-    public function IsError()
+    public function IsError() : bool
     {
         if(!empty($this->_errors)){
             return true;
         }
         return false;
     }
-    public function GetErrors(){
+    public function GetErrors()
+    {
         return $this->_errors;
     }
     // remove html code

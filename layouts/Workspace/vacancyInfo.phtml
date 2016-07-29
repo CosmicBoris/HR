@@ -1,0 +1,13 @@
+<?include_once Config::LAYOUT_DIR."userInfo".Config::LAYOUT_TYPE;?>
+<?=Menu::getMenu()?>
+<div class="wrap">
+
+    <div class="slide_side">
+        <div id="LContainer" class="container-fluid">
+
+            <?include_once Config::LAYOUT_DIR.Router::getControllerName(0)."/vacancyInfo_partial".Config::LAYOUT_TYPE;?>
+
+        </div>
+    </div>
+
+</div>

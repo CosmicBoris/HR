@@ -23,7 +23,7 @@ class Menu
                     'title' => "<span class=\"glyphicon glyphicon-log-out\"></span>LogOut"
                 )
     );
-    public static function getMenu()
+    public static function getMenu() : string
     {
         $output = '<div id="btn_menu_trigger" class="hamburger-button">'
                  .'<div id="nav-icon3">'
@@ -42,7 +42,7 @@ class Menu
         }
         return $output . '</ul></div>';
     }
-    public function isActiveItem($cat_id = false)
+    public function isActiveItem($cat_id = false) : string
     {
         if($cat_id === false && Router::getUriSegment(0) === false){
             return 'class="active"';

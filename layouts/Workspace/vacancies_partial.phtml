@@ -39,7 +39,9 @@
                 <div class="clearfix"></div>
             </div>
             <div class="table-responsive">
-                <table id="fvacancies" class="table table-bordered table-hover table-condensed" data-del-ref="/workspace/DeleteVacancy">
+                <table id="fvacancies" class="table table-bordered table-hover table-condensed"
+                       data-del-ref="/workspace/DeleteVacancy"
+                       data-info-ref="/workspace/VacancyInfo">
                     <thead>
                     <tr>
                         <th class="text-center"><span>№</span></th>
@@ -47,19 +49,21 @@
                         <th class="text-center"><span>Description</span></th>
                         <th class="text-center"><span>Date added</span></th>
                         <th class="text-center"><span>Assigned</span></th>
+                        <th class="text-center"><span>State</span></th>
                         <th colspan="2"></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <?php
+<?php
                     foreach ($this->vacancies as  $vacancy):
-                        ?>
+?>
                         <tr>
                             <td><?=$vacancy->N?></td>
                             <td><?=$vacancy->title?></td>
                             <td><?=$vacancy->description?></td>
                             <td><?=$vacancy->date_added?></td>
                             <td><?=$vacancy->assigned?></td>
+                            <td><?=$vacancy->state ? "Open" : "Closed"?></td>
                             <td>
                                 <button id="<?=$vacancy->id?>" class="btn btn-sm btn_c" data-action="info">
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
@@ -71,9 +75,9 @@
                                 </button>
                             </td>
                         </tr>
-                        <?php
+<?php
                     endforeach;
-                    ?>
+?>
                     </tbody>
                 </table>
             </div>

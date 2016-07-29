@@ -18,65 +18,67 @@ class WorkspaceController extends Controller
             die();
         }
         $this->_model = new workspaceModel();
-        paginationHelper::setCurrentPage((int)$_GET['page']);
+        paginationHelper::setCurrentPage($_GET['page'] ?? 1);
     }
     public function actionIndex()
     {
-        $this->_view->render();
+        $this->_view->fullRender();
     }
     
     public function actionEvents()
     {
         if($this->isPost()) {
             $response = array();
-            $event = new Event($_POST);
-            $event->class = $event->event_type;
-            $event->className = $event->event_type;
-            $event->start = date("Y-m-d H:i:s", strtotime($event->start));
-            $event->end = date("Y-m-d H:i:s", strtotime($event->end));
-            $response['success'] = $this->_model->AddEvent($event);
-            
+            $validator = Validator::GetInstance();
+            $validator->Prepare($_POST)->CheckForEmpty();
+            if(!$validator->IsError()) {
+                $event = new Event($_POST);
+                $event->class = $event->event_type;
+                $event->className = $event->event_type;
+                $event->start = date("Y-m-d H:i:s", strtotime($event->start));
+                $event->end = date("Y-m-d H:i:s", strtotime($event->end));
+                $response['success'] = $this->_model->AddEvent($event);
+            } else {
+                $response['warning'] = "Empty fields: " . implode(', ', $validator->GetErrors()['empty']);
+            }
             Response::ReturnJson($response);
         } else {
             $this->_view->vacancies = $this->_model->getVacancies(-1);
             $this->_view->users = $this->_model->getCandidates();
-
             $this->_view->SetTitle('Events');
-            if($this->isAjax())
-                $this->_view->partialRender();
-            else {
-                $this->_view->render();
-            }
+            $this->_view->render();
         }
     }
     public function actionFeed()
     {
         $events = array();
-        //$events['result'] = array();
-        if(isset($_GET['from'])){
-            $start = $_REQUEST['from'] / 1000;
-            $end   = $_REQUEST['to']   / 1000;
-            //$events['success'] = $this->_model->getEvents(date('Y-m-d', $start), date('Y-m-d', $end), $events['result']);
-        } else {
-            $start = $_REQUEST['start'];
-            $end   = $_REQUEST['end'];
-            $this->_model->getEvents($start, $end, $events);
-        }
+        $start = $_REQUEST['start'];
+        $end   = $_REQUEST['end'];
+        $this->_model->getEvents($start, $end, $events);
 
         Response::ReturnJson($events);
     }
+    public function actionCalFeed()
+    {
+        $start = $_REQUEST['from'] / 1000;
+        $end   = $_REQUEST['to']   / 1000;
+        
+    }
 
+    public function actionCandidateInfo()
+    {
+        $this->_view->candidate = $this->_model->getCandidate($_GET['id']);
+        $this->_view->assignedVacancies = $this->_model->GetAssignedVacancies($_GET['id']);
+
+        $this->_view->render();
+    }
     public function actionCandidates()
     {
-
         $this->_view->candidates = $this->_model->getCandidates(paginationHelper::getCurrentPage());
         $this->_view->vCount = $this->_model->CandidatesCount();
         $this->_view->vacancies = $this->_model->getVacancies(-1);
 
-        if($this->isAjax())
-            $this->_view->partialRender();
-        else
-            $this->_view->render();
+        $this->_view->render();
     }
     public function actionAddCandidate()
     {
@@ -113,9 +115,7 @@ class WorkspaceController extends Controller
                             )->getTableBody();
 
                             $response['vCount'] = $this->_model->CandidatesCount();
-                            $response['pagination'] = paginationHelper::Form(
-                                $response['vCount'], "/workspace/Candidates"
-                            );
+                            $response['pagination'] = paginationHelper::Form($response['vCount'], "/workspace/Candidates");
                         } else {
                             $response['error'] = $this->_model->getDBError();
                         }
@@ -123,24 +123,32 @@ class WorkspaceController extends Controller
                 } else {
                     $response['warning'] = "E-mail not correct!";
                 }    
-            } else {
+            } else
                 $response['warning'] = "Empty fields: " . implode(', ', $validator->GetErrors()['empty']);
-            }
 
             Response::ReturnJson($response);
         }
     }
+    public function actionEditCandidate()
+    {
+        if($this->_model->UpdateCandidate(new Candidate($_POST)))
+            Response::ReturnJson(['success'=>1]);
+    }
+    public function actionVacancyInfo()
+    {
+        $this->_view->users = $this->_model->getCandidates(-1);
+        $this->_view->vCount = $this->_model->VacanciesCount();
+        $this->_view->vacancies = $this->_model->getVacancies(paginationHelper::getCurrentPage());
 
+        $this->_view->render();
+    }
     public function actionVacancies()
     {
         $this->_view->users = $this->_model->getCandidates(-1);
         $this->_view->vCount = $this->_model->VacanciesCount();
         $this->_view->vacancies = $this->_model->getVacancies(paginationHelper::getCurrentPage());
 
-        if($this->isAjax())
-            $this->_view->partialRender();
-        else
-            $this->_view->render();
+        $this->_view->render();
     }
     public function actionAddVacancy()
     {
@@ -184,48 +192,19 @@ class WorkspaceController extends Controller
                             $response['vCount'], "/workspace/Vacancies"
                         );
 
-                    } else {
+                    } else
                         $response['error'] = $this->_model->getDBError();
-                    }
                 }
-
-            } else {
+            } else
                 $response['warning'] = 'Empty fields!';
-            }
+
             Response::ReturnJson($response);
         }
     }
 
     public function actionJournal()
     {
-        /*if($csearch = $_GET['search']) {
-            Response::ReturnJson();
-            $resp = array('heading' => 'Результати пошуку: '.$csearch);
-            $entitys = $this->_model->GetMyEntitys(Url::GetParam(), $csearch);
 
-            foreach( $entitys as &$entity ) {
-                $entity[] = htmlbuttonHelper::Form(
-                    array("class"=>"btn btn-info btn-xs",
-                        "id"=>$entity['Entity_EDRPOU'],
-                        '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>')
-                );
-                $entity[] = htmlbuttonHelper::Form(
-                    array("class"=>"btn btn-warning btn-xs",
-                        "id"=>$entity['Entity_EDRPOU'],
-                        'ред.<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>')
-                );
-            }
-            $ht = new htmltableHelper();
-            $resp['table'] = $ht->Body($entitys)->getTbody();
-            $resp['pagination'] = paginationHelper::Form(
-                $this->_model->GetMYEntitysCount($csearch), "workspace/LoadMyEntitys");
-            echo json_encode($resp);
-        } else {
-            $this->_view->heading = 'Мої підприємсва:';
-            $this->_view->numRows = $this->_model->GetMYEntitysCount();
-            $this->_view->myco = $this->_model->GetMyEntitys(Url::GetParam());
-            $this->_view->partialRender('entityTable');
-        }*/
     }
 
     public function actionDeleteCandidate()

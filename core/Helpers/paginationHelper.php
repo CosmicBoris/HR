@@ -10,13 +10,13 @@ class paginationHelper
 {
     static $nPages;
     static $elementsPerPage = 15;
-    private static $currentPage = 0;
+    private static $currentPage = 1;
 
-    static function SetCountPerPage($count)
+    static function SetCountPerPage(int $count)
     {
         self::$elementsPerPage = $count;
     }
-    static function Form($count, $destination)
+    static function Form($count, $destination) : string
     {
         if($count <= self::$elementsPerPage) {
             return false;
@@ -26,7 +26,7 @@ class paginationHelper
         $output = '<div class="pull-right">';
         $output .= '<ul class="pagination pagination-sm">';
 
-        if(self::$currentPage == 0){
+        if(self::$currentPage == 1){
             $output .= '<li class="disabled">';
         }else{
             $output .= '<li class="pageAct" data-action="'.$destination.'">';
@@ -34,26 +34,26 @@ class paginationHelper
         $output .='<span aria-hidden="true">&laquo;</span></li>';
 
         $limit = (self::$currentPage+3) < self::$nPages ? self::$currentPage+3 : self::$nPages;
-        for($i = (self::$currentPage > 2) ? self::$currentPage-2 : 0; $i < $limit; $i++ ):
+        for($i = (self::$currentPage > 2) ? self::$currentPage-2 : 1; $i <= $limit; $i++):
             if($i == self::$currentPage) {
-                $output .= '<li class="active"><span>' . ($i + 1) . ' <span class="sr-only">(0)</span></span></li>';
+                $output .= '<li class="active"><span>' . $i . ' <span class="sr-only">(0)</span></span></li>';
                 continue;
-        }
-            $output .= '<li class="pageAct" data-action="'.$destination.'?page='. $i .'"><span>'.($i + 1).'</span></li>';
+            }
+            $output .= '<li class="pageAct" data-action="'.$destination.'?page='. $i .'"><span>'.$i.'</span></li>';
         endfor;
-        if (self::$currentPage == self::$nPages - 1) {
+        if (self::$currentPage == self::$nPages) {
             $output .= '<li class="disabled">';
         } else {
-            $output .= '<li class="pageAct" data-action="'.$destination.'?page='.(self::$nPages - 1).'">';
+            $output .= '<li class="pageAct" data-action="'.$destination.'?page='.(self::$nPages).'">';
         }
 
-        $output .= '<a aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li></ul>';
-        $output .= '</div>';
+        $output .= '<span aria-hidden="true">&raquo;</span></li></ul></div>';
 
         return $output;
     }
-    static function Limit() {
-        return self::$currentPage * self::$elementsPerPage;
+    static function Limit() : int
+    {
+        return (self::$currentPage * self::$elementsPerPage) - self::$elementsPerPage;
     }
     /**
      * @param integer $newPage
@@ -61,9 +61,9 @@ class paginationHelper
      */
     public static function setCurrentPage($newPage)
     {
-        self::$currentPage = $newPage;
+        self::$currentPage = (is_numeric($newPage) && $newPage > 0) ? $newPage : 1;
     }
-    public static function getCurrentPage()
+    public static function getCurrentPage() : int
     {
         return self::$currentPage;
     }

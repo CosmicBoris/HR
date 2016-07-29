@@ -14,7 +14,7 @@ final class Storage
         $this->data[$name] = $value;
     }
     public function Get($name){
-        return (isset($this->data[$name]) ? $this->data[$name] : null);
+        return $this->data[$name] ?? null;
     }
     public function __isset($name){
         return isset($this->data[$name]);

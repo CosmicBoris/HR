@@ -97,12 +97,11 @@ final class DbHelper {
 		$this->_sql = 'UPDATE '.$this->GetSafeStr($table).' SET ';
 		foreach($fields as $key => $value)
 		{
-			if(!$value){
+			if(!$value)
 				continue;
-			}
-			$this->_sql .= $this->GetSafeStr($key);
-			$this->_sql .= "=";
-			$this->_sql .= $this->GetSafeStr($value, true).',';
+			$this->_sql .= $this->GetSafeStr($key)
+			. "=" .
+			$this->GetSafeStr($value, true).',';
 		}
 		$this->_sql = substr($this->_sql, 0, -1).' ';
 
@@ -133,28 +132,37 @@ final class DbHelper {
 	}
 	public function innerJoin($table, $fields, $tableToJoin = false)
 	{
-		if(is_array($table)){ // example ['user'=>'u'] user AS u
-			$tableName = $this->GetSafeStr(current($table));
-			$this->_sql .= ' INNER JOIN '.$this->GetSafeStr(key($table)).' AS '
-				.$tableName.' ON ';
-		}else{
-			$tableName = $this->GetSafeStr($table);
-			$this->_sql .= ' INNER JOIN '.$tableName.' ON ';
-		}
-
-		foreach($fields as $key => $value)
-		{
-			if(!$value) continue;
-			if($tableToJoin)
-				$this->_sql .= $this->GetSafeStr($tableToJoin).'.'.$this->GetSafeStr($key);
-			else
-				$this->_sql .= $this->_table.'.'.$this->GetSafeStr($key);
-
-			$this->_sql .= "=";
-			$this->_sql .= $tableName.'.'.$this->GetSafeStr($value);
-		}
-		return $this;
+		return $this->Join("INNER", $table, $fields, $tableToJoin);
 	}
+    public function LeftJoin($table, $fields, $tableToJoin = false)
+    {
+        return $this->Join("LEFT", $table, $fields, $tableToJoin);
+    }
+    public function Join($type, $table, $fields, $tableToJoin = false)
+    {
+        if(is_array($table)){ // example ['user'=>'u'] user AS u
+            $tableName = $this->GetSafeStr(current($table));
+            $this->_sql .= ' '.$type.' JOIN '.$this->GetSafeStr(key($table)).' AS '
+                .$tableName.' ON ';
+        } else {
+            $tableName = $this->GetSafeStr($table);
+            $this->_sql .= ' '.$type.' JOIN '.$tableName.' ON ';
+        }
+
+        foreach($fields as $key => $value)
+        {
+            if(!$value) continue;
+            if($tableToJoin)
+                $this->_sql .= $this->GetSafeStr($tableToJoin).'.'.$this->GetSafeStr($key);
+            else
+                $this->_sql .= $this->_table.'.'.$this->GetSafeStr($key);
+
+            $this->_sql .= "=";
+            $this->_sql .= $tableName.'.'.$this->GetSafeStr($value);
+        }
+        return $this;
+    }
+
 	/**
 	 * @param array $params
 	 * @param string $comparison (=, LIKE, IS, etc...)

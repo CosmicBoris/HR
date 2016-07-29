@@ -7,14 +7,14 @@ class Auth
     const USEREMAIL = 'usermail';
     const ROLE = 'role';
 
-    public static function IsAdmin()
+    public static function IsAdmin() : bool
     {
         if($_SESSION[self::ROLE] == 'admin') {
             return true;
         }
         return false;
     }
-    public static function IsLogged()
+    public static function IsLogged() : bool
     {
         if(!empty($_SESSION[self::USERID])) {
             return true;

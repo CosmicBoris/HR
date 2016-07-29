@@ -146,6 +146,7 @@ class SuperController extends Controller
     {
         echo $this->_model->ExecQuery($_POST['query']);
     }
+
     public function actionSetParam()
     {
         Response::ReturnJson();
@@ -154,6 +155,7 @@ class SuperController extends Controller
         }
         echo json_encode(array('status' => 1));
     }
+
     public function actionSearch()
     {
         $this->heading = 'Результати пошуку:';
