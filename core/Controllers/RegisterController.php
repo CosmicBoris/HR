@@ -7,14 +7,14 @@ class RegisterController extends Controller
     }
     public function actionIndex()
     {
-        
+        throw new Exception('Not implemented');
     }
     public function actionResult()
     {
-        
+        throw new Exception('Not implemented');
     }
     public function actionCheckEmail()
     {
-        
+        throw new Exception('Not implemented');
     }
 }

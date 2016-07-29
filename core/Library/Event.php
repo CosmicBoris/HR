@@ -22,7 +22,6 @@ class Event extends Init
     public function __construct($obj = false)
     {
         parent::__construct();
-        if($obj)
-            $this->Init($obj);
+        if($obj) $this->Init($obj);
     }
 }

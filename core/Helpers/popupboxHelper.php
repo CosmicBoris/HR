@@ -8,15 +8,13 @@
  */
 class popupboxHelper
 {
-	private static $output;
-
-	static function Form($id, $title = false, $buttons = false)
+	static function Form($id, $title = false, $buttons = false) : string
 	{
 		if(!$buttons){
 			$buttons[0] = "YES";
 			$buttons[1] = "NO";
 		}
-		self::$output = <<< TX
+        return <<< TX
 		<div class="popupbox" id="$id" role="alert">
 			<div class="popupbox-container">
 				<p>$title</p>
@@ -28,6 +26,5 @@ class popupboxHelper
 			</div>
 		</div>
 TX;
-		return self::$output;
 	}
 }

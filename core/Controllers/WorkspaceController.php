@@ -18,7 +18,7 @@ class WorkspaceController extends Controller
             die();
         }
         $this->_model = new workspaceModel();
-        paginationHelper::setCurrentPage((int)$_GET['page']);
+        paginationHelper::setCurrentPage($_GET['page'] ?? 1);
     }
     public function actionIndex()
     {
@@ -29,13 +29,18 @@ class WorkspaceController extends Controller
     {
         if($this->isPost()) {
             $response = array();
-            $event = new Event($_POST);
-            $event->class = $event->event_type;
-            $event->className = $event->event_type;
-            $event->start = date("Y-m-d H:i:s", strtotime($event->start));
-            $event->end = date("Y-m-d H:i:s", strtotime($event->end));
-            $response['success'] = $this->_model->AddEvent($event);
-            
+            $validator = Validator::GetInstance();
+            $validator->Prepare($_POST)->CheckForEmpty();
+            if(!$validator->IsError()) {
+                $event = new Event($_POST);
+                $event->class = $event->event_type;
+                $event->className = $event->event_type;
+                $event->start = date("Y-m-d H:i:s", strtotime($event->start));
+                $event->end = date("Y-m-d H:i:s", strtotime($event->end));
+                $response['success'] = $this->_model->AddEvent($event);
+            } else {
+                $response['warning'] = "Empty fields: " . implode(', ', $validator->GetErrors()['empty']);
+            }
             Response::ReturnJson($response);
         } else {
             $this->_view->vacancies = $this->_model->getVacancies(-1);
@@ -52,20 +57,29 @@ class WorkspaceController extends Controller
     public function actionFeed()
     {
         $events = array();
-        //$events['result'] = array();
-        if(isset($_GET['from'])){
-            $start = $_REQUEST['from'] / 1000;
-            $end   = $_REQUEST['to']   / 1000;
-            //$events['success'] = $this->_model->getEvents(date('Y-m-d', $start), date('Y-m-d', $end), $events['result']);
-        } else {
-            $start = $_REQUEST['start'];
-            $end   = $_REQUEST['end'];
-            $this->_model->getEvents($start, $end, $events);
-        }
+
+        $start = $_REQUEST['start'];
+        $end   = $_REQUEST['end'];
+        $this->_model->getEvents($start, $end, $events);
 
         Response::ReturnJson($events);
     }
+    public function actionCalFeed()
+    {
+        $start = $_REQUEST['from'] / 1000;
+        $end   = $_REQUEST['to']   / 1000;
+        
+    }
 
+    public function actionCandidateInfo()
+    {
+        $this->_view->candidate = $this->_model->getCandidate($_GET['id']);
+
+        if($this->isAjax())
+            $this->_view->partialRender();
+        else
+            $this->_view->render();
+    }
     public function actionCandidates()
     {
 
@@ -130,7 +144,17 @@ class WorkspaceController extends Controller
             Response::ReturnJson($response);
         }
     }
+    public function actionVacancyInfo()
+    {
+        $this->_view->users = $this->_model->getCandidates(-1);
+        $this->_view->vCount = $this->_model->VacanciesCount();
+        $this->_view->vacancies = $this->_model->getVacancies(paginationHelper::getCurrentPage());
 
+        if($this->isAjax())
+            $this->_view->partialRender();
+        else
+            $this->_view->render();
+    }
     public function actionVacancies()
     {
         $this->_view->users = $this->_model->getCandidates(-1);

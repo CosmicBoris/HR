@@ -48,6 +48,8 @@ body .fc { /* extra precedence to overcome jqui */
 
 .fc-unthemed .fc-today {
 	background: #e8fde7;
+	background: rgb(236, 255, 241);
+	box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.26);
 }
 
 .fc-highlight { /* when user is selecting cells */
@@ -223,7 +225,7 @@ NOTE: use percentage font sizes or else old IE chokes
 }
 
 .fc-state-down{
-	background-color: #cccccc;
+	background-color: #f5f5f5;
 	background-image: none;
 	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -254,7 +256,7 @@ previous button's border...
 
 .fc .fc-button-group > * { /* extra precedence b/c buttons have margin set to zero */
 	float: left;
-	margin: 0 0 0 -1px;
+	margin: 0 0 0 1px;
 }
 
 .fc .fc-button-group > :first-child { /* same */
@@ -497,10 +499,11 @@ temporary rendered events).
 	display: block; /* make the <a> tag block */
 	font-size: .85em;
 	line-height: 1.3;
-	border-radius: 3px;
-	border: 1px solid #3a87ad; /* default BORDER color */
+	border-radius: 1px;
+	border: 1px solid rgb(255, 255, 255); /* default BORDER color */
 	background-color: #3a87ad; /* default BACKGROUND color */
-	font-weight: normal; /* undo jqui's ui-widget-header bold */
+	font-weight: 400; /* undo jqui's ui-widget-header bold */
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* overpower some of bootstrap's and jqui's styles on <a> tags */
@@ -700,7 +703,7 @@ be a descendant of the grid when it is being dragged.
 }
 
 .fc-day-grid-event .fc-time {
-	font-weight: bold;
+	font-weight: normal;
 }
 
 /* resizer (cursor devices) */
@@ -846,9 +849,9 @@ a.fc-more:hover {
 .fc-view-container *,
 .fc-view-container *:before,
 .fc-view-container *:after {
+	box-sizing: content-box;
 	-webkit-box-sizing: content-box;
 	   -moz-box-sizing: content-box;
-	        box-sizing: content-box;
 }
 
 .fc-view, /* scope positioning and z-index's for everything within the view */
@@ -1250,4 +1253,13 @@ be a descendant of the grid when it is being dragged.
 	border-width: 5px 6px 5px 0;
 	border-top-color: transparent;
 	border-bottom-color: transparent;
+}
+.fc-head-container .fc-widget-header{
+	border: none;
+}
+.fc-basic-view td.fc-week-number span,
+.fc-basic-view td.fc-day-number.fc-today {
+	box-shadow: none;
+	color: #000000;
+	font-size: 1.4em;
 }

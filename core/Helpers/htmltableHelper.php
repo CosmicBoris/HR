@@ -9,12 +9,13 @@
  */
 class htmltableHelper
 {
-    private $output;
-    private $id;
-    private $class;
-    private $dataAttr;
-    private $thead;
-    private $tbody;
+    private
+        $output,
+        $id,
+        $class,
+        $dataAttr,
+        $thead,
+        $tbody;
 
     public function SetTableId($id)
     {

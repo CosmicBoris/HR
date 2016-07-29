@@ -8,12 +8,13 @@
  */
 class Vacancy extends Init
 {
-    public $id;
-    public $user_id;
-    public $title;
-    public $state;
-    public $date_added;
-    public $description;
+    public
+        $id,
+        $user_id,
+        $title,
+        $state,
+        $date_added,
+        $description;
     
     public function __construct($obj = false)
     {
