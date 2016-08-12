@@ -1,7 +1,7 @@
 /**
  * Created by boris on 08.03.2016.
  */
-var mouseStartX, mouseEndX, nInterval, currentRow, url, id;
+var mouseStartX, mouseEndX, nInterval, currentRow, url, id, searchTimer;
 $(document).ready(function()
 {
     InitSlimScroll(".scroll");
@@ -15,14 +15,14 @@ $(document).ready(function()
             
         }
     })
-        .on('click','.pageAct', function(e){
+        .on('click', '.pageAct', function(e){
         if($("#searchbox").length && $("#searchbox").val().length > 2) {
             JsonSearchResult(this);
         } else {
             GetAnswer(this.getAttribute('data-action'), 'LContainer');
         }
     })
-        .on('click',".popupbox", function(event) {  //  send login | close popup
+        .on('click', ".popupbox", function(event) {  //  send login | close popup
 
         if( $(event.target).is('.popupbox-close') || $(event.target).is('.popupbox') || $(event.target).is('#pub_no'))
         {
@@ -55,7 +55,7 @@ $(document).ready(function()
                 $(this).removeClass('open');
             }
         })
-        .on('click',"#btnAdd", function() {
+        .on('click', "#btnAdd", function() {
         $.ajax({
             type: 'POST',
             url: $('#form_new_entry').attr('action'),
@@ -76,17 +76,15 @@ $(document).ready(function()
             alert("error");
         });
     })
-        .on('click',"#btnSaveCan", function()
-        {
+        .on('click', "#btnSaveCan", function(){
             var formObj = $('#form_edit_entry');
-            var formElements = document.forms[0].elements;
+            var formElements = document.forms['editCan'].elements;
 
             $.ajax({
                 type: 'POST',
                 url: $(formObj).attr('action'),
                 data: $(formObj).serialize()
-            }).done( function(data )
-            {
+            }).done( function(data ) {
                 if(data.success == 1) {
                     $('td[data-name="name"]').html(formElements.fullname.value);
                     $('td[data-name="phone"]').html(formElements.phone.value);
@@ -101,13 +99,12 @@ $(document).ready(function()
                 } else if (!data.success) {
                     $("#edit_entry").find('h5').text(data.warning);
                 }
-            }).fail( function()
-            {
+            }).fail( function() {
                 alert("error");
             });
     })
         // DELETE button on table row
-        .on('click','table .btn[data-action="delete"]', function(e){
+        .on('click', 'table .btn[data-action="delete"]', function(e){
         e.preventDefault();
         id = this.id;
         currentRow = $(this).closest("tr");
@@ -116,19 +113,39 @@ $(document).ready(function()
         $('.popupbox>div>p').text("Delete \""+message+"\" ?");
         $('.popupbox').addClass('open');
     })
-        .on('click','table .btn[data-action="info"]', function(e)
-        {
+        .on('click', 'table .btn[data-action="info"]', function(e){
             var rel = $(this).closest("table").attr("data-info-ref") + "?id="+ this.id;
             GetAnswerCallback(rel, ShowProfile);
         })
-        .on('click', "#goBack", function()
-        {
+        .on('click', "#goBack", function(){
             $(".slide_side > div:nth-child(2)").remove();
             $("#LContainer").removeClass('minimized');
             window.history.back();
         })
-        .on('click',"#pub_ok", function(){
-            DeleteRow();
+        .on('click', "#pub_ok", DeleteRow)
+        .on('click', "#cross", function(evt){
+            evt.preventDefault();
+            $("#searchbox").val("");
+            $(this).removeClass('vis');
+        })
+        .on("keyup", "#searchbox", function(e){
+            //clearTimeout(searchTimer);
+                switch(e.which)
+                {
+                    case 16:
+                    case 17:
+                    case 18:
+                    return;
+                }
+            if($(this).val().length > 2) {
+                $("#cross").addClass("vis");
+                /*setTimeout(function(){
+                    JsonSearchResult(this);
+                }, 700);*/
+            } else if ($(this).val().length == 0) {
+                $("#cross").removeClass("vis");
+                //GetAnswer($(this).attr('data-action'), "wrap");
+            }
     });
 
     $("#btn_menu_trigger").on('click', function() {

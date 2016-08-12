@@ -32,9 +32,11 @@
             <div class="panel-heading-pure">
                 <button id="plus_one" class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
                 <div class="pull-right">
-                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                    <input id="searchbox" class="" type="text" placeholder="SEARCH">
-                    <label></label>
+                    <div id="search_field">
+                        <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        <input id="searchbox" type="text" placeholder="SEARCH" data-action="Super/GetAllUsers/0">
+                        <a href="#" class="sf_close" id="cross"></a>
+                    </div>
                 </div>
                 <div class="clearfix"></div>
             </div>

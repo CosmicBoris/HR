@@ -41,14 +41,14 @@ class View
      * @param string|bool $layout
      * @param string|bool $view
      */
-    public function render(string $layout = "", string $view = "")
+    public function render(string $layout = null, string $view = null)
     {
         if(isset($_GET['ajax']))
             $this->partialRender($layout);
         else
             $this->fullRender($layout, $view);
     }
-    public function fullRender(string $layout = "", string $view = "")
+    public function fullRender(string $layout = null, string $view = null)
     {
         if($layout) $this->_common_layout = $layout;
 
@@ -65,13 +65,15 @@ class View
     }
     public function partialRender(string $layout = null)
     {
-        $_view = Config::LAYOUT_DIR.Router::getControllerName(0).'/'
-                .($layout ?? lcfirst(Router::getActionName(0)))
-                .'_partial'.Config::LAYOUT_TYPE;
+        $_view = Config::LAYOUT_DIR.Router::getControllerName(0).'/'.
+            ($layout ?? lcfirst(Router::getActionName(0))).
+            "_partial".Config::LAYOUT_TYPE;
 
         try {
             include_once $_view;
-        } catch(Exception $e) {}
+        } catch(Exception $e) {
+
+        }
     }
 
     public function SetPropertyArray(array $array)

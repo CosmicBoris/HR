@@ -96,26 +96,7 @@ class WorkspaceController extends Controller
                         if($this->_model->AddCandidate($candidate, $_POST['vacancy_id'])) {
                             $response['success'] = 1;
 
-                            $candidates = $this->_model->getCandidates(0);
-
-                            foreach( $candidates as $c ){
-                                $c->btnInfo = htmlbuttonHelper::Form(
-                                    ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
-                                        '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
-                                );
-                                $c->btnRemove = htmlbuttonHelper::Form(
-                                    ["id" =>$c->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
-                                        '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
-                                );
-                            }
-
-                            $ht = new htmltableHelper();
-                            $response['table'] = $ht->BodyFromObj($candidates,
-                                ['N', 'fullname', 'email', 'phone','assigned','btnInfo','btnRemove']
-                            )->getTableBody();
-
-                            $response['vCount'] = $this->_model->CandidatesCount();
-                            $response['pagination'] = paginationHelper::Form($response['vCount'], "/workspace/Candidates");
+                            $this->_model->GenerateCandidatesTableContent(0, $response);
                         } else {
                             $response['error'] = $this->_model->getDBError();
                         }
@@ -210,7 +191,7 @@ class WorkspaceController extends Controller
     public function actionDeleteCandidate()
     {
         $response = $this->_model->Delete('candidates', $_GET['id']);
-        if($response['success'] == 1){
+        if($response['success'] == 1) {
             $this->_model->GenerateCandidatesTableContent(paginationHelper::getCurrentPage(), $response);
         }
 

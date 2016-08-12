@@ -105,7 +105,7 @@
                 <h5></h5>
                 <hr>
                 <div class="form-group text-center">
-                    <form id="form_edit_entry" action="/workspace/EditCandidate" method="POST">
+                    <form id="form_edit_entry" name="editCan" action="/workspace/EditCandidate" method="POST">
                         <span id="warnings" class="text-danger"></span>
                         <p><input class="field" type="text" name="fullname" placeholder="Name" maxlength="96" value="<?=$this->candidate->fullname?>"></p>
 
@@ -125,7 +125,7 @@
                                 </li>
 
                                 <li>
-                                    <input type="radio" name="sex" id="cd-radio-2" value="2" <?=$this->candidate->sex == 0 ? "checked":"" ?>>
+                                    <input type="radio" name="sex" id="cd-radio-2" value="0" <?=$this->candidate->sex == 0 ? "checked":"" ?>>
                                     <label for="cd-radio-2">female</label>
                                 </li>
                             </ul>
