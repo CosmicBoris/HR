@@ -1,4 +1,6 @@
 <?php
+define('LOG_QUERY_AND_RESULT', TRUE);
+
 class Config
 {
     const DEFAULT_CONTROLLER = "Home";
@@ -28,4 +30,6 @@ class Config
     //const CONTROLLERS_DIR = "/home/u635387968/public_html/core/Controllers/";
     //const VIEWS_DIR = '/home/u635387968/public_html/core/Views/';
     //const LAYOUT_DIR = '/home/u635387968/public_html/layouts/';
+
+    const SEARCH_STRING = "search_str";
 }

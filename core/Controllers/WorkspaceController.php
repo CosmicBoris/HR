@@ -43,7 +43,7 @@ class WorkspaceController extends Controller
             }
             Response::ReturnJson($response);
         } else {
-            $this->_view->vacancies = $this->_model->getVacancies(-1);
+            $this->_view->vacancies = $this->_model->getVacancies(["page" => -1]);
             $this->_view->users = $this->_model->getCandidates();
             $this->_view->SetTitle('Events');
             $this->_view->render();
@@ -74,11 +74,22 @@ class WorkspaceController extends Controller
     }
     public function actionCandidates()
     {
-        $this->_view->candidates = $this->_model->getCandidates(paginationHelper::getCurrentPage());
-        $this->_view->vCount = $this->_model->CandidatesCount();
-        $this->_view->vacancies = $this->_model->getVacancies(-1);
+        $params = [
+            "page" => paginationHelper::getCurrentPage(),
+            "search" => $this->GetSearchParam()
+        ];
 
-        $this->_view->render();
+        if($params['search']) {
+            $response = array();
+            $this->_model->GenerateCandidatesTableContent($params, $response);
+            $response['success'] = 1;
+            Response::ReturnJson($response);
+        } else {
+            $this->_view->vCount = $this->_model->CandidatesCount($params['search']);
+            $this->_view->candidates = $this->_model->getCandidates($params);
+            $this->_view->vacancies = $this->_model->getVacancies(["page" => -1]);
+            $this->_view->render();
+        }
     }
     public function actionAddCandidate()
     {
@@ -115,27 +126,40 @@ class WorkspaceController extends Controller
         if($this->_model->UpdateCandidate(new Candidate($_POST)))
             Response::ReturnJson(['success'=>1]);
     }
+    public function actionSearchInCandidates()
+    {
+        $response = array();
+    }
+
     public function actionVacancyInfo()
     {
-        $this->_view->users = $this->_model->getCandidates(-1);
-        $this->_view->vCount = $this->_model->VacanciesCount();
-        $this->_view->vacancies = $this->_model->getVacancies(paginationHelper::getCurrentPage());
-
+        $this->_view->vacancy = $this->_model->getVacancy($_GET['id']);
+        $this->_view->assignedCandidates = [];
         $this->_view->render();
     }
     public function actionVacancies()
     {
-        $this->_view->users = $this->_model->getCandidates(-1);
-        $this->_view->vCount = $this->_model->VacanciesCount();
-        $this->_view->vacancies = $this->_model->getVacancies(paginationHelper::getCurrentPage());
+        $params = [
+            "page" => paginationHelper::getCurrentPage(),
+            "search" => $this->GetSearchParam()
+        ];
 
-        $this->_view->render();
+        if($params['search']) {
+            $response = array();
+            $this->_model->GenerateVacanciesTableContent($params, $response);
+            $response['success'] = 1;
+            Response::ReturnJson($response);
+        } else {
+            $this->_view->users = $this->_model->getCandidates(["page" => -1]);
+            $this->_view->vacancies = $this->_model->getVacancies($params);
+            $this->_view->vCount = $this->_model->VacanciesCount($params['search']);
+            $this->_view->render();
+        }
     }
     public function actionAddVacancy()
     {
         if($this->isPost()) {
             $response = array();
-
             $validator = Validator::GetInstance();
             $validator->Prepare($_POST, ['title','description'])->CheckForEmpty();
 
@@ -143,36 +167,13 @@ class WorkspaceController extends Controller
                 $vacancy = new Vacancy($validator->GetAllFields());
                 $vacancy->user_id = Auth::GetUserID();
 
-                if(!$response['warning'] = $this->_model->FindVacancy($vacancy)) {
-                    if($this->_model->AddVacancy($vacancy, $_POST['candidate_id'])) {
+                if(!$response['warning'] = $this->_model->FindVacancy($vacancy))
+                {
+                    if($this->_model->AddVacancy($vacancy, $_POST['candidate_id']))
+                    {
                         $response['success'] = 1;
-                        $vacancies = $this->_model->getVacancies(0);
 
-                        foreach( $vacancies as $vac )
-                        {
-                            $vac->btnInfo = htmlbuttonHelper::Form(
-                                ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "info",
-                                    '<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>']
-                            );
-                            $vac->btnRemove = htmlbuttonHelper::Form(
-                                ["id" =>$vac->id, "class" => "btn btn-sm btn_c", "data-action" => "delete",
-                                    '<span class="glyphicon glyphicon glyphicon-remove" aria-hidden="true"></span>']
-                            );
-                            unset($vac->id);
-                            unset($vac->user_id);
-                            unset($vac->state);
-                        }
-
-                        $ht = new htmltableHelper();
-                        $response['table'] = $ht->BodyFromObj($vacancies,
-                            ['N','title','description','date_added','assigned','btnInfo','btnRemove']
-                        )->getTableBody();
-
-                        $response['vCount'] = $this->_model->VacanciesCount();
-                        $response['pagination'] = paginationHelper::Form(
-                            $response['vCount'], "/workspace/Vacancies"
-                        );
-
+                        $this->_model->GenerateVacanciesTableContent(["page"=>0],$response);
                     } else
                         $response['error'] = $this->_model->getDBError();
                 }
@@ -181,6 +182,11 @@ class WorkspaceController extends Controller
 
             Response::ReturnJson($response);
         }
+    }
+    public function actionEditVacancy()
+    {
+        if($this->_model->UpdateVacancy(new Vacancy($_POST)))
+            Response::ReturnJson(['success'=>1]);
     }
 
     public function actionJournal()
@@ -205,5 +211,10 @@ class WorkspaceController extends Controller
         }
 
         Response::ReturnJson($response);
+    }
+
+    function GetSearchParam()
+    {
+        return $_GET[Config::SEARCH_STRING] ?? false;
     }
 }

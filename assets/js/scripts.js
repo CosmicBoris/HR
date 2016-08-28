@@ -1,7 +1,8 @@
 /**
  * Created by boris on 08.03.2016.
  */
-var mouseStartX, mouseEndX, nInterval, currentRow, url, id, searchTimer;
+var mouseStartX, mouseEndX, nInterval, currentRow, url, id, searchTimer, backUp;
+var needReload = false;
 $(document).ready(function()
 {
     InitSlimScroll(".scroll");
@@ -15,29 +16,36 @@ $(document).ready(function()
             
         }
     })
-        .on('click', '.pageAct', function(e){
-        if($("#searchbox").length && $("#searchbox").val().length > 2) {
-            JsonSearchResult(this);
+        .on('click', '.pageAct', function() {
+
+            var sb = $("#searchbox")[0];
+
+        if(sb.value && sb.value.length > 2) {
+            GetAnswer(this.getAttribute('data-action')+'?search='+sb.value, 'LContainer');
         } else {
             GetAnswer(this.getAttribute('data-action'), 'LContainer');
         }
     })
         .on('click', ".popupbox", function(event) {  //  send login | close popup
 
-        if( $(event.target).is('.popupbox-close') || $(event.target).is('.popupbox') || $(event.target).is('#pub_no'))
+            var etarget = $(event.target);
+
+        if( etarget.is('.popupbox-close') || etarget.is('.popupbox') || etarget.is('#pub_no'))
         {
             event.preventDefault();
-            if($(event.target).attr('data-attr') != 'glued') {
+            if(etarget.attr('data-attr') != 'glued')
                 $(this).removeClass('open');
-            }
-        } else if ( $(event.target).is('#btnLogin')) {
+
+        } else if (etarget.is('#btnLogin')) {
             Login();
         }
     })
         .on('click', "#plus_one",function() {
-            $("#new_entry").find('h5').text("");
-            $("#new_entry").find('form').find("input[type=text], textarea").val("");
-            $("#new_entry").addClass('open');
+            var elm = $("#new_entry");
+
+            elm.find('h5').text("");
+            elm.find('form').find("input[type=text], textarea").val("");
+            elm.addClass('open');
     })
         .on('click', "#btn_edit",function() {
             $("#edit_entry").addClass('open');
@@ -56,12 +64,13 @@ $(document).ready(function()
             }
         })
         .on('click', "#btnAdd", function() {
+            var formObj = $('#form_new_entry');
+
         $.ajax({
             type: 'POST',
-            url: $('#form_new_entry').attr('action'),
-            data: $('#form_new_entry').serialize()
-        }).done( function(data )
-        {
+            url: formObj.attr('action'),
+            data: formObj.serialize()
+        }).done( function(data ){
             if(data.success == 1) {
                 $("#new_entry").removeClass('open');
                 $('.badge.badge-primary').text(data.vCount);
@@ -71,8 +80,7 @@ $(document).ready(function()
             } else if (!data.success) {
                 $("#new_entry").find('h5').text(data.warning);
             }
-        }).fail( function()
-        {
+        }).fail( function(){
             alert("error");
         });
     })
@@ -86,7 +94,7 @@ $(document).ready(function()
                 data: $(formObj).serialize()
             }).done( function(data ) {
                 if(data.success == 1) {
-                    $('td[data-name="name"]').html(formElements.fullname.value);
+                    $('[data-name="name"]').html(formElements.fullname.value);
                     $('td[data-name="phone"]').html(formElements.phone.value);
                     $('a[data-name="email"]').attr('href', "mailto:"+formElements.email.value).html(formElements.email.value);
                     $('td[data-name="age"]').html("AGE: "+formElements.age.value);
@@ -102,51 +110,84 @@ $(document).ready(function()
             }).fail( function() {
                 alert("error");
             });
-    })
+        })
+        .on('click', "#btnSaveVac", function(){
+            var formObj = $('#form_edit_entry');
+            var formElements = document.forms['editVac'].elements;
+
+            $.ajax({
+                type: 'POST',
+                url: formObj.attr('action'),
+                data: formObj.serialize()
+            }).done( function(data ) {
+                if(data.success == 1) {
+                    $('[data-name="title"]').html(formElements.fullname.value);
+                    $('td[data-name="phone"]').html(formElements.phone.value);
+                    $('a[data-name="email"]').attr('href', "mailto:"+formElements.email.value).html(formElements.email.value);
+                    $('td[data-name="age"]').html("AGE: "+formElements.age.value);
+                    $('td[data-name="sex"]').html("GENDER: " + (formElements.sex.value == 1 ? "Male" : "Female"));
+
+                    $("#edit_entry").removeClass('open');
+                } else if (!data.success) {
+                    $("#edit_entry").find('h5').text(data.warning);
+                }
+            }).fail( function() {
+                alert("error");
+            });
+        })
         // DELETE button on table row
         .on('click', 'table .btn[data-action="delete"]', function(e){
         e.preventDefault();
         id = this.id;
         currentRow = $(this).closest("tr");
-        url = $(currentRow).closest("table").attr("data-del-ref");
-        var message = $(currentRow).children('td:nth-child(2)').text();
+        url = currentRow.closest("table").attr("data-del-ref");
+        var message = currentRow.children('td:nth-child(2)').text();
         $('.popupbox>div>p').text("Delete \""+message+"\" ?");
         $('.popupbox').addClass('open');
     })
         .on('click', 'table .btn[data-action="info"]', function(e){
+            id = this.id;
             var rel = $(this).closest("table").attr("data-info-ref") + "?id="+ this.id;
             GetAnswerCallback(rel, ShowProfile);
         })
         .on('click', "#goBack", function(){
-            $(".slide_side > div:nth-child(2)").remove();
-            $("#LContainer").removeClass('minimized');
+            /*$(".slide_side > div:nth-child(2)").remove();
+            $("#LContainer").removeClass('minimized');*/
+
+            var container = $("#LContainer");
+            container.addClass('minimized');
+            container.html(backUp);
+            container.removeClass('minimized');
+
             window.history.back();
         })
         .on('click', "#pub_ok", DeleteRow)
         .on('click', "#cross", function(evt){
             evt.preventDefault();
-            $("#searchbox").val("");
+            $("#searchbox").val("").trigger("keyup");
             $(this).removeClass('vis');
         })
-        .on("keyup", "#searchbox", function(e){
-            //clearTimeout(searchTimer);
-                switch(e.which)
-                {
-                    case 16:
-                    case 17:
-                    case 18:
-                    return;
-                }
-            if($(this).val().length > 2) {
-                $("#cross").addClass("vis");
-                /*setTimeout(function(){
-                    JsonSearchResult(this);
-                }, 700);*/
-            } else if ($(this).val().length == 0) {
-                $("#cross").removeClass("vis");
-                //GetAnswer($(this).attr('data-action'), "wrap");
+        .on("keyup ", "#searchbox", function(e) {
+
+            switch(e.which) {
+                case 16:
+                case 17:
+                case 18:
+                    return false;
             }
-    });
+            if(this.value.length > 2) {
+                $("#cross").addClass("vis");
+                var uri = $(this).attr('data-action')+'?search_str='+this.value;
+                GetAnswerCallback(uri, SearchResult);
+                needReload = true;
+            } else if (this.value.length == 0) {
+                $("#cross").removeClass("vis");
+                if(needReload) {
+                    GetAnswer($(this).attr('data-action'), "LContainer");
+                    needReload = false;
+                }
+            }
+        });
 
     $("#btn_menu_trigger").on('click', function() {
         $("#nav-icon3").toggleClass("open");
@@ -159,7 +200,7 @@ $(document).ready(function()
                 event.preventDefault();
                 deleteAllCookies();
             }
-            $("#menu li").removeClass("topCurrent");
+            $("#menu").find("li").removeClass("topCurrent");
             GetAnswer( $(event.target).parent().attr('data-action'), "LContainer");
             $(event.target).parent().addClass("topCurrent");
         }
@@ -190,8 +231,11 @@ function Login()
 
 function ShowProfile(data)
 {
-    $("#LContainer").addClass("minimized").after(data);
+    var elem = $("#LContainer");
+    backUp = elem.html();
+    elem.addClass("minimized").html(data);
     InitSlimScroll(".scroll");
+    elem.removeClass('minimized');
 }
 
 function InitSlimScroll(selector)
@@ -259,7 +303,7 @@ function DeleteRow()
             }, 800);
         }
     }).fail(function() {
-        alert("error");
+        alert("Delete Row error");
     });
 }
 
@@ -288,7 +332,7 @@ function GetAnswer(url, callBackElementId)
             loadingScreen(false);
             if( xmlhttp.status == 200){
                 element.innerHTML = xmlhttp.responseText;
-                $(element).find("script").each(function(i) {
+                $(element).find("script").each(function() {
                     eval($(this).text());
                 });
             }
@@ -305,7 +349,7 @@ function GetAnswer(url, callBackElementId)
         GetJsonErrorHandle(error);
     }
 }
-function GetAnswerCallback(url, callbackFunction)
+function GetAnswerCallback(url, callbackFunction, pushState)
 {
     var req;
     if (window.XMLHttpRequest)
@@ -329,7 +373,8 @@ function GetAnswerCallback(url, callbackFunction)
     req.open("GET", url.indexOf('?') !== -1 ? url+'&ajax' : url+'?ajax', true);
     req.send();
 
-    history.pushState({'page_id': 1}, 'hr', url);
+    if(pushState)
+        history.pushState({'page_id': 1}, 'hr', url);
 }
 
 function PostForm(id_str, callbackFunction)
@@ -388,56 +433,21 @@ function GetJsonResponse(url, callbackFunction)
     req.send();
 }
 
+function SearchResult(data)
+{
+    data = JSON.parse(data);
+    if(data.success) {
+        $(".pull-right>.pagination").detach();
+        $(".table-responsive").after(data['pagination']);
+        $(".table>tbody").html(data['table']);
+        $(".badge-primary").html(data['vCount']);
+    }
+}
+
 function GetJsonErrorHandle(obj)
 {
     loadingScreen(false);
     alert("Request fail"+ obj.message);
-}
-
-function DeleteCandidate(e)
-{
-    $.ajax({
-        method: "GET",
-        dataType: "json",
-        data: {id: e.id, table: 'candidates'},
-        url: '/workspace/Delete',
-        timeout: 2000
-    }).done(function(data) {
-        if(data.success == 1) {
-
-            $("#delBox").removeClass("open");
-            var tr = $(e).closest('tr');
-            tr.fadeOut(500, function() {
-                tr.remove();
-            });
-            
-            setTimeout(function(){
-                GetAnswer('/workspace/Candidates', "LContainer")
-            }, 800);
-        }
-    }).fail(function() {
-        alert("error");
-    });
-
-
-    $.ajax({
-        dataType: "json",
-        url: rel,
-        data: {id: id}
-    }).done(function(data){
-        if(data.success == 1) {
-            $("#delBox").removeClass("open");
-            currentRow.fadeOut(500, function(){currentRow.remove();});
-            $(".pull-right>.pagination").detach();
-            $(".table-responsive").after(data.pagination);
-            setTimeout( function() {
-                $('.badge.badge-primary').text(data.vCount);
-                $(".table>tbody").html(data.table);
-            }, 800);
-        }
-    }).fail(function() {
-        alert("error");
-    });
 }
 
 function loadingScreen(nState)

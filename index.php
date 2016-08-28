@@ -2,8 +2,6 @@
 /*  ini_set('session.cookie_lifetime', 60 * 60);
     ini_set('session.gc-maxlifetime', 60 * 60);*/
 	session_start();
-    define('LOG_QUERY_AND_RESULT', TRUE);
-
     // Main config file
     require_once 'core/App/Config.php';
 
@@ -22,4 +20,5 @@
         }
         require_once $filepath.$filename;
     }
+
     $router = new Router();

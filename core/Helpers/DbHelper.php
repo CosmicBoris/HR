@@ -86,7 +86,7 @@ final class DbHelper {
 			$this->_table = $this->GetSafeStr(current($table));
 			$this->_sql = 'SELECT '.$this->GetSafeStr($fields).' FROM '.$this->GetSafeStr(key($table)).' AS '
 				.$this->_table;
-		}else{
+		} else {
 			$this->_table = $this->GetSafeStr($table);
 			$this->_sql = 'SELECT '.$this->GetSafeStr($fields).' FROM '.$this->_table;
 		}
@@ -111,9 +111,8 @@ final class DbHelper {
 	{
         $this->_sql = 'INSERT INTO '.$this->GetSafeStr($table);
         if(is_object($obj)) {
-            foreach ($obj as $key => $value ) {
+            foreach ($obj as $key => $value )
                 if(empty($value)) unset($obj->$key);
-            }
 
             $this->_sql .= '('.$this->GetSafeStr(array_keys( get_object_vars($obj))).')'
                 .' VALUES('.$this->GetSafeStr(array_values(get_object_vars($obj)), true).')';
@@ -255,8 +254,7 @@ final class DbHelper {
 		$output = null;
 		$this->_sql = $query;
 		$result = $this->RunQuery();
-		if ($result && !$this->_db->error)
-		{
+		if ($result && !$this->_db->error) {
 			if($result->num_rows > 1) {
 				$output = array();
 				while ($obj = $result-> fetch_assoc()) {
@@ -292,33 +290,6 @@ final class DbHelper {
 			}
 		}
 		return false;
-	}
-	function GetCandidates($from)
-	{
-		$sql = "SELECT `id`,`fullname`,`sex`,`age`,`profile`,`email`,`phone`,`photo`,`skills`,"
-			."COUNT(`vc`.`candidate_id`) AS `assigned` "
-			."FROM `candidates` "
-			."LEFT JOIN `vacancies_candidates` AS `vc` ON `candidates`.`id`=`vc`.`candidate_id` "
-			."LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id` "
-			."WHERE `uc`.`user_id`=".Auth::GetUserID()
-			." GROUP BY `id` ";
-		/*$order = 'ORDER BY `date_added` DESC ';*/
-
-		if($from != -1) $sql.="LIMIT $from,".paginationHelper::$elementsPerPage;
-
-		$result = $this->_db->query($sql);
-		if(!$result || $result->num_rows == 0) return [];
-		
-		$candidates = array();
-
-		while ($obj = $result->fetch_assoc()) {
-			$candidate = new Candidate($obj);
-			$candidate->N = (int)++$from;
-			$candidate->assigned = $obj['assigned'];
-			$candidates[] = $candidate;
-		}
-		
-		return $candidates;
 	}
 	function GetCandidate($id)
 	{

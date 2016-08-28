@@ -47,25 +47,66 @@ class WorkspaceModel extends Model
             ->where(['id' => $c->id])->RunQuery();
     }
 
-    function CandidatesCount()
+    function CandidatesCount($search = null)
     {
-        return $this->dbLink->select('candidates', 'id')
-            ->innerJoin('user_candidates', ['id'=>'candidate_id'])
-            ->where(['user_id'=>Auth::GetUserID()])
-            ->RunQuery()->num_rows;
+        $query = "SELECT COUNT(*) AS c FROM `candidates`".
+            " INNER JOIN `user_candidates` ON `candidates`.`id`=`user_candidates`.`candidate_id`".
+            " WHERE `user_id`=".Auth::GetUserID();
+        if($search)
+            $query .= " AND `fullname` COLLATE UTF8_GENERAL_CI LIKE '%{$search}%'";
+
+        return $this->dbLink->ExecuteSql($query)['c'];
     }
     function getCandidate($id)
     {
         return $this->dbLink->GetCandidate($id);
     }
-    function getCandidates($from = 0)
+    function getCandidates(array $params)
     {
-        $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
-        if( !$cs && $from > 0 ){
+        $sql = "SELECT `id`,`fullname`,`sex`,`age`,`profile`,`email`,`phone`,`photo`,`skills`,"
+            ."COUNT(`vc`.`candidate_id`) AS `assigned` "
+            ."FROM `candidates` "
+            ."LEFT JOIN `vacancies_candidates` AS `vc` ON `candidates`.`id`=`vc`.`candidate_id` "
+            ."LEFT JOIN `user_candidates` AS `uc` ON `candidates`.`id`=`uc`.`candidate_id`";
+        $where = " WHERE `uc`.`user_id`=".Auth::GetUserID();
+        if($params['search'])
+            $where .= " AND `fullname` COLLATE UTF8_GENERAL_CI LIKE '%{$params['search']}%'";
+
+        $group = " GROUP BY `id`";
+        $order = " ORDER BY `date_added` DESC ";
+        $limit = "";
+        if($params['page'] != self::GET_ALL)
+            $limit = "LIMIT ".paginationHelper::LimitString();
+
+        $result = $this->dbLink->ExecuteSql($sql.$where.$group.$order.$limit);
+
+        if(!$result) return [];
+
+        if(count($result) === 0 && $params['page'] > 0) {
             paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
-            $cs = $this->dbLink->GetCandidates(paginationHelper::Limit());
+            $limit = "LIMIT ".paginationHelper::LimitString();
+
+            $result = $this->dbLink->ExecuteSql($sql.$where.$group.$order.$limit);
+            if(!$result) return false;
         }
-        return $cs;
+        $candidates = array();
+
+        $n = paginationHelper::Limit();
+        if(is_array($result) && is_array($result[0])) {
+            foreach($result as $obj){
+                $candidate = new Candidate($obj);
+                $candidate->N = (int)++$n;
+                $candidate->assigned = $obj['assigned'];
+                $candidates[] = $candidate;
+            }
+        } else if (is_array($result)){
+            $candidate = new Candidate($result);
+            $candidate->N = (int)++$n;
+            $candidate->assigned = $result['assigned'];
+            $candidates[] = $candidate;
+        }
+
+        return $candidates;
     }
     function FindCandidate(Candidate $c)
     {
@@ -130,10 +171,22 @@ class WorkspaceModel extends Model
         $this->dbLink->commit();
         return $result;
     }
-    function VacanciesCount(){
-        return $this->dbLink->select('vacancies', 'id')
-            ->where(['user_id'=>Auth::GetUserID()])
-            ->RunQuery()->num_rows;
+    function UpdateVacancy(Vacancy $v)
+    {
+        return $this->dbLink->update('vacancies',
+            [
+                "title"=>$v->title,
+                "description"=>$v->description,
+                "state"=>$v->state,
+            ])->where(['id' => $v->id])->RunQuery();
+    }
+    function VacanciesCount($search = null)
+    {
+        $query = "SELECT COUNT(*) AS c FROM `vacancies` WHERE `user_id`=".Auth::GetUserID();
+        if($search)
+            $query .= " AND `title` COLLATE UTF8_GENERAL_CI LIKE '%{$search}%'";
+
+        return $this->dbLink->ExecuteSql($query)['c'];
     }
     function PrepareRow($data, &$rows)
     {
@@ -152,34 +205,48 @@ class WorkspaceModel extends Model
             $rows[] = $v;
         }
     }
-    function getVacancies($from = 0, $searchStr = false)
+    function getVacancy(int $id) : Vacancy
+    {
+        $vacancy = new Vacancy();
+        $result = $this->dbLink->select('vacancies', array_keys(get_object_vars($vacancy)))
+            ->where(['id'=>$id, 'user_id'=>Auth::GetUserID()], '=', 'AND')
+            ->RunQuery();
+
+		if(empty($this->dbLink->getErrors())) {
+            if($obj = $result->fetch_assoc())
+                $vacancy->Init($obj);
+        }
+		return $vacancy;
+    }
+    function getVacancies(array $params)
     {
         $sql = "SELECT `id`,`user_id`,`title`,`state`,`date_added`,`description`, "
             ."COUNT(`vc`.`vacancy_id`) AS `assigned` "
             ."FROM `vacancies` "
-            ."LEFT JOIN `vacancies_candidates` AS `vc` ON `vacancies`.`id`=`vc`.`vacancy_id` "
-            ."WHERE `user_id`=".Auth::GetUserID()
-            ." GROUP BY `id` ";
-        $order = 'ORDER BY `date_added` DESC ';
+            ."LEFT JOIN `vacancies_candidates` AS `vc` ON `vacancies`.`id`=`vc`.`vacancy_id` ";
+        $where = "WHERE `user_id`=".Auth::GetUserID();
+        if($params['search'])
+            $where .= " AND `title` COLLATE UTF8_GENERAL_CI LIKE '%{$params['search']}%'";
 
-        $vacancies = array();
+        $group = " GROUP BY `id`";
+        $order = " ORDER BY `date_added` DESC ";
+        $limit = "";
+        if($params['page'] != self::GET_ALL)
+            $limit = "LIMIT ".paginationHelper::LimitString();
 
-        if($from != self::GET_ALL) $order .= "LIMIT ".paginationHelper::Limit().",".paginationHelper::$elementsPerPage;
+        $result = $this->dbLink->ExecuteSql($sql.$where.$group.$order.$limit);
 
-        $result = $this->dbLink->ExecuteSql($sql.$order);
-        if(!$result) return $vacancies;
-
-        $this->PrepareRow($result, $vacancies);
+        if(!$result) return [];
         
-        if(count($vacancies) == 0 && $from > 0) {
+        if($result === 0 && $params['page'] > 0) {
             paginationHelper::setCurrentPage(paginationHelper::getCurrentPage() - 1);
-            $limit = "LIMIT ".paginationHelper::Limit().",".paginationHelper::$elementsPerPage;
+            $limit = "LIMIT ".paginationHelper::LimitString();
 
-            $result = $this->dbLink->ExecuteSql(($from != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
+            $result = $this->dbLink->ExecuteSql(($params['page'] != self::GET_ALL ) ? $sql.$order.$limit : $sql.$order);
             if(!$result) return false;
-
-            $this->PrepareRow($result, $vacancies);
         }
+        $vacancies = array();
+        $this->PrepareRow($result, $vacancies);
         return $vacancies;
     }
     function GetAssignedVacancies(int $candidateId)
@@ -234,9 +301,9 @@ class WorkspaceModel extends Model
         return 1;
     }
     
-    function GenerateCandidatesTableContent($page, &$response)
+    function GenerateCandidatesTableContent($params, &$response)
     {
-        $candidates = $this->getCandidates($page);
+        $candidates = $this->getCandidates($params);
 
         foreach( $candidates as $c ){
             $c->btnInfo = htmlbuttonHelper::Form(
@@ -254,14 +321,14 @@ class WorkspaceModel extends Model
             ['N', 'fullname', 'email', 'phone','assigned','btnInfo','btnRemove']
         )->getTableBody();
 
-        $response['vCount'] = $this->CandidatesCount();
+        $response['vCount'] = $this->CandidatesCount($params['search']);
         $response['pagination'] = paginationHelper::Form(
             $response['vCount'], "/workspace/Candidates"
         );
     }
-    function GenerateVacanciesTableContent($page, &$response)
+    function GenerateVacanciesTableContent($params, &$response)
     {
-        $vacancies = $this->getVacancies($page);
+        $vacancies = $this->getVacancies($params);
 
         foreach( $vacancies as $vac )
         {
@@ -280,12 +347,12 @@ class WorkspaceModel extends Model
 
         $ht = new htmltableHelper();
         $response['table'] = $ht->BodyFromObj($vacancies,
-            ['N','title', 'description', 'date_added', 'assigned','state','btnInfo','btnRemove']
+            ['N','title','description','date_added','assigned','state','btnInfo','btnRemove']
         )->getTableBody();
 
-        $response['vCount'] = $this->VacanciesCount();
+        $response['vCount'] = $this->VacanciesCount($params['search']);
         $response['pagination'] = paginationHelper::Form(
-            $response['vCount'], "/workspace/Vacancies"
+            $response['vCount'], "/Workspace/Vacancies"
         );
     }
 

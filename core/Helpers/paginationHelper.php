@@ -55,6 +55,11 @@ class paginationHelper
     {
         return (self::$currentPage * self::$elementsPerPage) - self::$elementsPerPage;
     }
+    static function LimitString() : string
+    {
+        return self::Limit().','.self::$elementsPerPage;
+    }
+
     /**
      * @param integer $newPage
      * Call this from controller constructor (int)$_GET['page']

@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div id="Candidate_info">
-        <h2 class="info"><?=$this->candidate->fullname?></h2>
+        <h2 class="info" data-name="name"><?=$this->candidate->fullname?></h2>
 
         <? if(isset($_GET['ajax'])):?>
         <button id="goBack" class="button button--rect button--size-m">
@@ -29,15 +29,15 @@
                             <img src="<?=$this->candidate->photo ?? "/assets/svg/no_photo.svg"?>">
                         </div>
                     </td>
-                    <td class="pad_l" >NAME:</td>
+                    <td class="pad_l _hi">NAME:</td>
                     <td data-name="name"><?=$this->candidate->fullname?></td>
                 </tr>
                 <tr>
-                    <td class="pad_l" >PHONE:</td>
+                    <td class="pad_l _hi" >PHONE:</td>
                     <td data-name="phone"><?=$this->candidate->phone?></td>
                 </tr>
                 <tr>
-                    <td class="pad_l" >EMAIL:</td>
+                    <td class="pad_l _hi" >EMAIL:</td>
                     <td><a href="mailto:<?=$this->candidate->email?>" data-name="email"><?=$this->candidate->email?></a></td>
                 </tr>
                 <tr class="text-center">
@@ -48,7 +48,7 @@
                     <td data-name="sex">GENDER: <?=$this->candidate->sex ? "Male" : "Female"?></td>
                 </tr>
                 <tr class="text-center">
-                    <td><span>SKILLS:</span></td>
+                    <td class="_hi">SKILLS:</td>
                     <td colspan="2">
                         <input id="target_tag" data-role="tagsinput" type="text" value="<?=$this->candidate->skills?>">
                     </td>
