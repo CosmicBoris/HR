@@ -2,9 +2,9 @@
 
 class LoginController extends Controller
 {
-    public function __construct()
+    public function __construct($router)
     {
-        parent::__construct();
+        parent::__construct($router);
 
         if(Auth::IsLogged())
         {

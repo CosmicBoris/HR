@@ -7,9 +7,9 @@
  */
 class WorkspaceController extends Controller
 {
-    public function __construct()
+    public function __construct(Router $router)
     {
-        parent::__construct();
+        parent::__construct($router);
         if(Auth::IsAdmin()) {
             header("Location: /super");
             exit();
@@ -22,7 +22,7 @@ class WorkspaceController extends Controller
     }
     public function actionIndex()
     {
-        $this->_view->fullRender();
+        $this->RedirectToAction("Events");
     }
     
     public function actionEvents()
@@ -44,7 +44,7 @@ class WorkspaceController extends Controller
             Response::ReturnJson($response);
         } else {
             $this->_view->vacancies = $this->_model->getVacancies(["page" => -1]);
-            $this->_view->users = $this->_model->getCandidates();
+            $this->_view->users = $this->_model->getCandidates(["page" => -1]);
             $this->_view->SetTitle('Events');
             $this->_view->render();
         }

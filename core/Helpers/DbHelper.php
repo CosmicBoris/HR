@@ -97,7 +97,7 @@ final class DbHelper {
 		$this->_sql = 'UPDATE '.$this->GetSafeStr($table).' SET ';
 		foreach($fields as $key => $value)
 		{
-			if(!$value)
+			if($value === null)
 				continue;
 			$this->_sql .= $this->GetSafeStr($key)
 			. "=" .

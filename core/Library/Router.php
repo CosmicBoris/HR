@@ -18,7 +18,8 @@ class Router
 
     public function Start()
 	{
-		if(!empty(self::$segments[0])) { // [0] имя контролера с большой буквы
+		if(!empty(self::$segments[0])) {
+		    // [0] имя контролера с большой буквы
             self::$segments[0] = ucfirst(self::$segments[0]);
             $controller_name = self::$segments[0].'Controller';
 		} else {
@@ -26,7 +27,7 @@ class Router
             $controller_name = Config::DEFAULT_CONTROLLER.'Controller';
         }
 		if(file_exists(Config::CONTROLLERS_DIR.$controller_name.'.php')) {
-			$controller = new $controller_name();
+			$controller = new $controller_name($this);
             $action_name = (empty(self::$segments[1])) ? 'actionIndex' : 'action'.ucfirst(self::$segments[1]);
 			if(method_exists($controller, $action_name)) {
 				$controller->$action_name();
@@ -41,12 +42,17 @@ class Router
 			$controller->show404();
 		}
 	}
+	public function Redirect(string $path)
+    {
+        self::$segments = explode('/', $path);
+        $this->Start();
+    }
 
     /**
      * @param $mod
      * @return mixed|string
      */
-    public static function getControllerName($mod) : string
+    public static function getControllerName($mod = self::SHORT_NAME) : string
     {
         $name = "";
         if(!empty(self::$segments[0]))
@@ -61,7 +67,7 @@ class Router
      * @param $mod(FULL_NAME|SHORT_NAME)
      * @return string
      */
-    public static function getActionName($mod) : string
+    public static function getActionName($mod = self::SHORT_NAME) : string
     {
         $name = "";
         if(!empty(self::$segments[1]))

@@ -121,11 +121,9 @@ $(document).ready(function()
                 data: formObj.serialize()
             }).done( function(data ) {
                 if(data.success == 1) {
-                    $('[data-name="title"]').html(formElements.fullname.value);
-                    $('td[data-name="phone"]').html(formElements.phone.value);
-                    $('a[data-name="email"]').attr('href', "mailto:"+formElements.email.value).html(formElements.email.value);
-                    $('td[data-name="age"]').html("AGE: "+formElements.age.value);
-                    $('td[data-name="sex"]').html("GENDER: " + (formElements.sex.value == 1 ? "Male" : "Female"));
+                    $('[data-name="title"]').html(formElements.title.value);
+                    $('td[data-name="description"]').html(formElements.description.value);
+                    $('td[data-name="state"]').html(formElements.state.checked == 1 ? "Opened" : "Closed");
 
                     $("#edit_entry").removeClass('open');
                 } else if (!data.success) {
@@ -148,7 +146,7 @@ $(document).ready(function()
         .on('click', 'table .btn[data-action="info"]', function(e){
             id = this.id;
             var rel = $(this).closest("table").attr("data-info-ref") + "?id="+ this.id;
-            GetAnswerCallback(rel, ShowProfile);
+            GetAnswerCallback(rel, ShowProfile, true);
         })
         .on('click', "#goBack", function(){
             /*$(".slide_side > div:nth-child(2)").remove();
@@ -168,7 +166,6 @@ $(document).ready(function()
             $(this).removeClass('vis');
         })
         .on("keyup ", "#searchbox", function(e) {
-
             switch(e.which) {
                 case 16:
                 case 17:
@@ -196,15 +193,15 @@ $(document).ready(function()
 
     $("#menu").on('click', function(event) {
         if(event.target != this) {
-            if( $(event.target).is('#logOut')) {
+            if( $(event.target).text() == "LogOut") {
                 event.preventDefault();
-                deleteAllCookies();
+                return LogOut();
             }
-            $("#menu").find("li").removeClass("topCurrent");
+            $(this).find("li").removeClass("topCurrent");
             GetAnswer( $(event.target).parent().attr('data-action'), "LContainer");
             $(event.target).parent().addClass("topCurrent");
         }
-        $("#menu").removeClass("open");
+        RemoveClass(this, "open");
         $("#nav-icon3").removeClass("open");
     });
 });
@@ -242,9 +239,8 @@ function InitSlimScroll(selector)
 {
     $(selector).each(function()
     {
-        if ($(this).attr("data-initialized")) {
+        if ($(this).attr("data-initialized"))
             return;
-        }
 
         var height;
         if ($(this).attr("data-height")) {
@@ -271,16 +267,11 @@ function InitSlimScroll(selector)
 
 function InitTagsInput()
 {
-    $('[data-role="tagsinput"]').each(function()
-    {
-        if ($(this).attr("data-initialized")) {
+    $('[data-role="tagsinput"]').each(function(){
+        if ($(this).attr("data-initialized"))
             return;
-        }
 
-        $(this).tagsinput({
-            maxTags: 20
-        });
-
+        $(this).tagsinput({maxTags: 20});
         $(this).attr("data-initialized", "1");
     });
 }
@@ -475,6 +466,19 @@ function RemoveClass(elID, cName)
     element.className = element.className.replace(cName, '');
 }
 
+function LogOut()
+{
+    deleteAllCookies();
+    $.ajax({
+        method: "POST",
+        url: "/Logout",
+        data: { LOGOUT: "1"}
+    })
+    .done(function( data ) {
+        window.location.reload(true);
+    });
+}
+
 function deleteAllCookies()
 {
     var cookies = document.cookie.split(";");
@@ -484,16 +488,6 @@ function deleteAllCookies()
         var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
         document.cookie = name + "=;expires=Thu, 01 Jan 2000 00:00:00 GMT";
     }
-    $.ajax({
-            method: "POST",
-            url: $('#FL').attr('action'),
-            data: { LOGOUT: "1"}
-        })
-        .done(function( data ) {
-            if(data.auth == 0) {
-                $("#pblogin").addClass("open");
-            }
-        });
 }
 /*for(var key in formData)
  $("#t_info").find("td[data-name*='"+key+"']" ).text(formData[key]);*/

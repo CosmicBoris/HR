@@ -173,6 +173,10 @@ class WorkspaceModel extends Model
     }
     function UpdateVacancy(Vacancy $v)
     {
+        if($v->state === null)
+            $v->state = 0;
+        else
+            $v->state = 1;
         return $this->dbLink->update('vacancies',
             [
                 "title"=>$v->title,

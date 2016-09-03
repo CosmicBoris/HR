@@ -85,10 +85,6 @@ h4.header {
     -webkit-transform: translateX(0%);
     transform: translateX(0%);
 }
-.innerShift {
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-}
 .slide_side {
     border: 0 solid #fff;
     border-right-width: 2rem;
@@ -486,73 +482,6 @@ h4.header {
     color: #000;
 }
 
-/*Toggle switch Begin*/
-.switch{ /**/
-    border: 1px solid #fbfbfb;
-    border-top-color: #e3e3e3;
-    padding-top: 3px;
-    padding-right: 7px !important;
-}
-.sw-toggle {
-    position: absolute;
-    margin-right: 5px;
-    margin-left: -9999px;
-    visibility: hidden;
-}
-.sw-toggle + label {
-    display: inline-block;
-    position: relative;
-    cursor: pointer;
-    outline: none;
-    user-select: none;
-}
-/*Border*/
-input.sw-toggle-sq + label {
-    width: 46px;
-    height: 20px;
-    background-color: #c8c8c8;
-    border-radius: 2px;
-    margin-top: 2px;
-}
-input.sw-toggle-sq + label:before,
-input.sw-toggle-sq + label:after {
-    background-color: #d9534f;
-    background-color: #d9d9d9;
-    display: block;
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    bottom: 1px;
-    content: "";
-}
-input.sw-toggle-sq + label:before {
-    right: 1px;
-    border-radius: 2px;
-    transition: background 0.4s;
-}
-/*top switch*/
-input.sw-toggle-sq + label:after {
-    width: 20px;
-    background-color: #fff;
-    border-radius: 15%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    -moz-transition: all 0.3s ease-in-out;
-    transition: all 0.3s ease-in-out;
-}
-input.sw-toggle-sq.checked + label:before {
-    background-color: #6cd77a;
-}
-input.sw-toggle-sq.checked + label:after {
-    margin-left: 24px;
-}
-/*Label on left important add bootstrap pull-left */
-.switch span{
-    font-size: 15px;
-    font-weight: lighter;
-    padding: 5px 10px 0 10px;
-}
-/*Toggle switch End*/
-
 .topLeftCenter{
     z-index: 24;
     height: 3.05em;
@@ -702,6 +631,8 @@ textarea.field {
     margin-bottom: 5px;
     width: 280px;
     max-width: 90%;
+    min-width: 280px;
+    min-height: 90px;
 }
 select._select{
     margin: auto;
@@ -1201,11 +1132,45 @@ table#t_info > tbody > tr > td > div.bootstrap-tagsinput > span > span {
     display: none;
 }
 table#t_info > tbody > tr > td#photo_container > div#profile_photo {
+    position: relative;
     height: 120px;
     width: 120px;
     border-radius: 50%;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     overflow: hidden;
+}
+
+div#profile_photo span{
+    position: absolute;
+    top: 0;
+    left: -15px;
+    content: "";
+    background-color: #00bad9;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    vertical-align: middle;
+    float: left;
+    display: block;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    -webkit-transform: translate3d(0, 100%, 0) rotatez(130deg);
+    -moz-transform: translate3d(0, 100%, 0) rotatez(130deg);
+    -ms-transform: translate3d(0, 100%, 0) rotatez(130deg);
+    -o-transform: translate3d(0, 100%, 0) rotatez(130deg);
+    transform: translate3d(0, 100%, 0) rotatez(130deg);
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    -o-transition: all .3s;
+    transition: all .3s;
+}
+div#profile_photo:hover span {
+    opacity: 1 !important;
+    transform: translate3d(0, 60%, 0);
 }
 
 #search_field .sf_close {
@@ -1261,6 +1226,70 @@ table#t_info > tbody > tr > td#photo_container > div#profile_photo {
     margin-bottom: 0;
 }
 
+/*Toggle switch Begin*/
+.switch{
+    padding-top: 3px;
+    padding-right: 7px !important;
+    height: 32px;
+}
+.sw-toggle {
+    position: absolute;
+    margin-right: 5px;
+    margin-left: -9999px;
+    visibility: hidden;
+}
+.sw-toggle + label {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    user-select: none;
+}
+/*Border*/
+input.sw-toggle-sq + label {
+    width: 46px;
+    height: 20px;
+    background-color: #c8c8c8;
+    border-radius: 2px;
+    margin-top: 2px;
+}
+input.sw-toggle-sq + label:before,
+input.sw-toggle-sq + label:after {
+    background-color: #d9d9d9;
+    display: block;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    bottom: 1px;
+    content: "";
+}
+input.sw-toggle-sq + label:before {
+    right: 1px;
+    border-radius: 2px;
+    transition: background 0.4s;
+}
+/*top switch*/
+input.sw-toggle-sq + label:after {
+    width: 20px;
+    background-color: #fff;
+    border-radius: 15%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    -moz-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+input.sw-toggle-sq:checked + label:before {
+    background-color: #6cd77a;
+}
+input.sw-toggle-sq:checked + label:after {
+    margin-left: 24px;
+}
+/*Label on left important add bootstrap pull-left */
+.switch span{
+    font-size: 15px;
+    font-weight: lighter;
+    padding: 5px 10px 0px 10px;
+}
+/*Toggle switch End*/
 
 /* Example for media query (depends on total height of menu) */
 /*lower size at bottom*/

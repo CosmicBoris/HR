@@ -23,6 +23,10 @@ class Menu
                     'title' => "<span class=\"glyphicon glyphicon-log-out\"></span>LogOut"
                 )
     );
+    public static function setMenu(array $menu)
+    {
+        self::$menu = $menu;
+    }
     public static function getMenu() : string
     {
         $output = '<div id="btn_menu_trigger" class="hamburger-button">'

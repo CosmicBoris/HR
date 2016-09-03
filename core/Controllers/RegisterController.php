@@ -1,9 +1,9 @@
 <?php
 class RegisterController extends Controller
 {
-    public function __construct()
+    public function __construct(Router $router)
     {
-        parent::__construct();
+        parent::__construct($router);
     }
     public function actionIndex()
     {

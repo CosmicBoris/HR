@@ -1,9 +1,9 @@
 <?php
 class SuperController extends Controller
 {
-    public function __construct()
+    public function __construct(Router $router)
     {
-        parent::__construct(); // initialize view + parent common methods
+        parent::__construct($router); // initialize view + parent common methods
         $this->_view->SetTitle('Адміністратор');
         $this->_model = new SuperModel();
         if(!Auth::isAdmin()) {

@@ -5,12 +5,14 @@ abstract class Controller
         $_model,
         $_view,
         $_storage,
+        $_router,
         $_errors;
 
-    public function __construct()
+    public function __construct(Router $router)
     {
-        $this->_storage = new Storage(); // common storage between Controller Model and View;;
+        $this->_storage = new Storage(); // common storage between Controller Model and View;
         $this->_view = new View($this->_storage);
+        $this->_router = $router;
         $this->_errors = array();
     }
     /** default action of every Controller **/
@@ -21,6 +23,15 @@ abstract class Controller
         Response::ReturnCode(404);
         $this->_view->SetTitle('Page not found');
         $this->_view->render('nopage');
+    }
+
+    public function Redirect(string $path)
+    {
+        $this->_router->Redirect($path);
+    }
+    public function RedirectToAction(string $actionName)
+    {
+        $this->_router->Redirect(Router::getControllerName().'/'.$actionName);
     }
 
     public function isPost() : bool

@@ -16,7 +16,7 @@
             $filepath = 'core/'. $segments[1]. 's/';
         }
         if (file_exists($filepath.$filename) == false) {
-            die('file '.$filepath.$filename.' not found');
+            exit('file '.$filepath.$filename.' not found');
         }
         require_once $filepath.$filename;
     }

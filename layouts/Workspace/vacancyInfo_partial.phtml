@@ -35,7 +35,7 @@
                     </tr>
                     <tr>
                         <td class="pad_l _hi" >Description:</td>
-                        <td data-name="phone" class="text-center" rowspan="3" colspan="3"><?=$this->vacancy->description?></td>
+                        <td data-name="description" class="text-center" rowspan="3" colspan="3"><?=$this->vacancy->description?></td>
                     </tr>
                     <tr>
                     </tr>
@@ -108,13 +108,14 @@
                             <textarea class="field" name="description" placeholder="Description" rows="5"><?=$this->vacancy->description?></textarea>
                         </p>
 
-
+                        <div class="paper_label">
+                            <span>State</span>
+                        </div>
                         <div class="switch">
-                            <span class="pull-left">Лише авторизовані </span>
-                            <input id="sw-toggle-1" class="sw-toggle sw-toggle-sq" type="checkbox"/>
+                            <input name="state" id="sw-toggle-1" class="sw-toggle sw-toggle-sq <?=$this->vacancy->state ? "checked":""?>" type="checkbox" <?=$this->vacancy->state ? "checked":""?>>
                             <label for="sw-toggle-1"></label>
                         </div>
-                        <input type="checkbox"/>
+                        <input name="id" value="<?=$this->vacancy->id?>" hidden>
                     </form>
                 </div>
             </div>
