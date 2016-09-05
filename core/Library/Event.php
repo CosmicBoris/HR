@@ -14,7 +14,6 @@ class Event extends Init
         $start,
         $end,
         $event_type,
-        $class,
         $className,
         $candidate_id,
         $vacancy_id;

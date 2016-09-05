@@ -39,7 +39,7 @@ final class Validator // vse proverki tut
         }
         else {
             foreach($this->_required_fields as $field_name){
-                if(empty($this->_data[$field_name])){
+                if(is_null($this->_data[$field_name])) {
                     $this->_errors['empty'][] = $field_name;
                 }
             }

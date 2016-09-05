@@ -184,7 +184,18 @@ $(document).ready(function()
                     needReload = false;
                 }
             }
-        });
+        })
+        .on('click', "#profile_photo", function(){
+            var pop = $("#fdOpen");
+            pop.addClass("showUp");
+            setTimeout(function(){
+                pop.removeClass("showUp");
+            }, 5000);
+        })
+        .on('click', "#fdOpen", function(){
+            $("#photoUpload").click();
+        })
+        .on('change', "#photoUpload", HandlePhotoUpload);
 
     $("#btn_menu_trigger").on('click', function() {
         $("#nav-icon3").toggleClass("open");
@@ -205,6 +216,74 @@ $(document).ready(function()
         $("#nav-icon3").removeClass("open");
     });
 });
+
+function HandlePhotoUpload(e){
+    var file = e.target.files[0];
+    if (file) {
+        var cv = document.createElement("canvas");
+        cv.width = 300;
+        cv.height = 300;
+        var cvc = cv.getContext("2d");
+        var img = new Image();
+        img.onload = function(e){
+
+            var percentW = cv.width / e.target.width,
+                percentH = cv.height / e.target.height;
+            var percent = percentW > percentH ? percentW : percentH;
+
+            var newWidth = Math.floor(percent * e.target.width),
+                newHeight = Math.floor(percent * e.target.height);
+
+            var c = document.createElement("canvas");
+            c.width = newWidth;
+            c.height = newHeight;
+            var cc = c.getContext("2d");
+            cc.drawImage(e.target, 0, 0, newWidth, newHeight);
+            var sx = Math.floor((newWidth - cv.width) / 2),
+                sy = Math.floor((newHeight - cv.height) / 2);
+            cvc.drawImage(c, sx, sy, cv.width, cv.height, 0, 0, cv.width, cv.height);
+            var imgData = cv.toDataURL("image/jpeg");
+            $("#profile_photo").find("img").attr('src', imgData);
+
+            $.ajax({
+                type: 'POST',
+                url: '/Workspace/AddPhoto',
+                data: {
+                    id: id,
+                    photo: imgData
+                }
+            }).done( function(data ){
+                if(data.success == 1) {}
+                else if (!data.success) {}
+            }).fail( function(){
+                alert("error");
+            });
+
+        };
+        var reader = new FileReader();
+        reader.onload = function(event){
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+        /*var fd = new FormData(document.querySelector("#fUpload"));
+         App.loadingScreen(true);
+         $.ajax({
+         url: "Home/Upload",
+         type: "POST",
+         data: fd,
+         dataType: "json",
+         processData: false,  // tell jQuery not to process the data
+         contentType: false   // tell jQuery not to set contentType
+         }).done(function(response){
+         App.VaultData = response;
+         $("#welcome").remove();
+         App.PrepareUI();
+         }).fail(function(xhr, status, error) {
+         alert(error.message);
+         }).always(App.loadingScreen(false));
+         }*/
+}
 
 function Login()
 {
@@ -230,9 +309,13 @@ function ShowProfile(data)
 {
     var elem = $("#LContainer");
     backUp = elem.html();
-    elem.addClass("minimized").html(data);
-    InitSlimScroll(".scroll");
-    elem.removeClass('minimized');
+    /*elem.addClass("minimized").html(data);*/
+    elem.addClass("minimized");
+    setTimeout(function(){
+        elem.html(data);
+        InitSlimScroll(".scroll");
+        elem.removeClass('minimized');
+    },300);
 }
 
 function InitSlimScroll(selector)
@@ -262,6 +345,23 @@ function InitSlimScroll(selector)
         });
 
         $(this).attr("data-initialized", "1");
+    });
+}
+function InitDateTime(selector)
+{
+    $(selector).each(function()
+    {
+        if ($(this).attr("data-init"))
+            return;
+
+        $(this).datetimepicker({
+            format: "dd-MM-yyyy hh:ii",
+            autoclose: true,
+            todayBtn: true,
+            minuteStep: 10
+        });
+
+        $(this).attr("data-init", "1");
     });
 }
 

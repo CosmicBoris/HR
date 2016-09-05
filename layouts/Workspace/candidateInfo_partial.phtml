@@ -26,8 +26,8 @@
                 <tr>
                     <td id="photo_container" rowspan="3">
                         <div id="profile_photo">
-                            <img src="<?=$this->candidate->photo ?? "/assets/svg/no_photo.svg"?>">
-                            <span class="glyphicon glyphicon-cloud-upload"></span>
+                            <img src="<?=$this->candidate->photo ?? "/assets/svg/no_photo.svg"?>" height="128" width="128">
+                            <span id="fdOpen" class="glyphicon glyphicon-cloud-upload"></span>
                         </div>
                     </td>
                     <td class="pad_l _hi">NAME:</td>
@@ -57,7 +57,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+        </div>
         <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading-pure">
@@ -67,7 +67,7 @@
                 </div>
                 <div class="clearfix"></div>
             </div>
-            <div class="scroll" data-height="220">
+            <div class="scroll" data-height="224">
                 <ul>
 <?php
                     foreach ($this->assignedVacancies as $vacancy):
@@ -86,15 +86,20 @@
             </div>
         </div>
     </div>
-        <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading-pure">
-                <h4 class="header text-center">Timeline</h4>
-                <div class="clearfix"></div>
-            </div>
-            date_added
-        </div>
     </div>
+
+    <div class="row spacer">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading-pure">
+                    <h4 class="header text-center">Timeline</h4>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="scroll" data-height="220">
+                    date_added
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="edit_entry" class="paper_dialog">
@@ -143,7 +148,7 @@
             </div>
         </div>
     </div>
-
+    <input type="file" name="photo" id="photoUpload" accept=".jpg,.jpeg" style="display:none">
     <script>
         document.title = "Candidate <?=$this->candidate->fullname?>";
         InitTagsInput();

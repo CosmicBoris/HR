@@ -46,6 +46,14 @@ class WorkspaceModel extends Model
             ])
             ->where(['id' => $c->id])->RunQuery();
     }
+    function InsertPhoto($id, $photo)
+    {
+        return $this->dbLink->update('candidates',
+            [
+                "photo"=>$photo
+            ])
+            ->where(['id' => $id])->RunQuery();
+    }
 
     function CandidatesCount($search = null)
     {
@@ -360,7 +368,7 @@ class WorkspaceModel extends Model
         );
     }
 
-    function Delete($from, $id)
+    function Delete($from, $id) : array
     {
         $result = [];
 

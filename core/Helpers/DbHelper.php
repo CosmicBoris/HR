@@ -112,7 +112,7 @@ final class DbHelper {
         $this->_sql = 'INSERT INTO '.$this->GetSafeStr($table);
         if(is_object($obj)) {
             foreach ($obj as $key => $value )
-                if(empty($value)) unset($obj->$key);
+                if(is_null($value)) unset($obj->$key);
 
             $this->_sql .= '('.$this->GetSafeStr(array_keys( get_object_vars($obj))).')'
                 .' VALUES('.$this->GetSafeStr(array_values(get_object_vars($obj)), true).')';

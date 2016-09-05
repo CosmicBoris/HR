@@ -16,7 +16,7 @@ body {
 }
 
 h2.info {
-    margin: 0 1em 0 2em;
+    margin: 0 1em .2em 2em;
     font-family: 'Lato', sans-serif;
     font-weight: 100;
     color: #5f5f5f;
@@ -55,6 +55,7 @@ h4.header {
     border: none;
     border-top: 1px solid white;
     box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    margin-bottom: 0;
 }
 .form-control {
     border-radius: 0;
@@ -604,8 +605,11 @@ h4.header {
     margin-right: -5px;
     margin-left: -5px;
 }
-.row.spacer:not(:first-child) {
-    margin-top: 10px;     /*Was 20px*/
+/*.row.spacer:not(:first-child) {
+    margin-top: 10px;     !*Was 20px*!
+}*/
+.row.spacer ~ .spacer{
+    margin-top: 10px;
 }
 .text-centred{
     text-align: center;
@@ -619,7 +623,8 @@ input.field {
     margin-top: 5px;
     margin-bottom: 5px;
     height: 31px;
-    width: 280px;
+    width: 70%;
+    min-width: 280px;
 }
 textarea.field {
     font-family: 'Roboto Condensed', sans-serif;
@@ -629,8 +634,7 @@ textarea.field {
     border-radius: 0;
     margin-top: 5px;
     margin-bottom: 5px;
-    width: 280px;
-    max-width: 90%;
+    width: 70%;
     min-width: 280px;
     min-height: 90px;
 }
@@ -638,7 +642,8 @@ select._select{
     margin: auto;
     left:50%;
     height: 31px;
-    width: 280px;
+    width: 70%;
+    min-width: 280px;
 }
 
 .form_input_size{
@@ -1068,25 +1073,25 @@ button#goBack {
 
 div#Candidate_info {
     position: relative;
-    height: 42px;
+    height: 47px;
 }
 #LContainer{
     -webkit-transition: -webkit-transform 0.3s ease 0s;
-    -webkit-transition: opacity 0.5s, visibility 0s 0s;
-    -moz-transition: opacity 0.5s, visibility 0s 0s;
-    transition: opacity 0.5s, visibility 0s 0s, transform 0.3s ease 0s;
+    -webkit-transition: opacity 0.5s, visibility 0.5s 0s;
+    -moz-transition: opacity 0.5s, visibility 0.5s 0s;
+    transition: opacity 0.5s, visibility 0.5s 0s, transform 0.3s ease 0s;
 }
 #LContainer.minimized {
-    -webkit-transform: scale(0.8);
-    transform: scale(0.8);
+    -webkit-transform: scale(0.9);
+    transform: scale(0.9);
     overflow: hidden;
-    /*visibility: hidden;*/
+    visibility: hidden;
     opacity: 0;
 
-    -webkit-transition: -webkit-transform 0.3s ease 0s;
-    -webkit-transition: opacity 0.5s, visibility 0s 1s;
-    -moz-transition: opacity 0.5s, visibility 0s 1s;
-    transition: opacity 0.5s, visibility 0s 1s, transform 0.3s ease 0s;
+    -webkit-transition: -webkit-transform 0.3s ease 0.1s;
+    -webkit-transition: opacity 0.3s, visibility 0.3s 0.3s;
+    -moz-transition: opacity 0.3s, visibility 0.3s 0.3s;
+    transition: opacity 0.3s, visibility 0.3s 0.3s, transform 0.2s ease 0.1s;
 }
 
 .col-md-3,
@@ -1120,8 +1125,8 @@ table#t_info > tbody > tr > td > a {
     color: #3c3c3c;
 }
 table#t_info > tbody > tr > td#photo_container {
-    height: 130px;
-    width: 130px;
+    height: 138px;
+    width: 138px;
     padding: 5px;
 }
 table#t_info > tbody > tr > td > div.bootstrap-tagsinput {
@@ -1132,23 +1137,25 @@ table#t_info > tbody > tr > td > div.bootstrap-tagsinput > span > span {
     display: none;
 }
 table#t_info > tbody > tr > td#photo_container > div#profile_photo {
+    z-index: 3;
     position: relative;
-    height: 120px;
-    width: 120px;
+    height: 128px;
+    width: 128px;
     border-radius: 50%;
+    -webkit-border-radius: 50%;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 div#profile_photo span{
     position: absolute;
     top: 0;
-    left: -15px;
+    left: -11px;
     content: "";
-    background-color: #00bad9;
-    -webkit-border-radius: 20px;
-    -moz-border-radius: 20px;
+    background-color: rgba(0,0,0,0.8);
     border-radius: 50%;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
     width: 150px;
     height: 150px;
     vertical-align: middle;
@@ -1168,7 +1175,12 @@ div#profile_photo span{
     -o-transition: all .3s;
     transition: all .3s;
 }
-div#profile_photo:hover span {
+div#profile_photo span::before {
+    color: #9b9b9b;
+}
+div#profile_photo:hover span,
+div#profile_photo span.showUp
+{
     opacity: 1 !important;
     transform: translate3d(0, 60%, 0);
 }
@@ -1293,7 +1305,12 @@ input.sw-toggle-sq:checked + label:after {
 
 /* Example for media query (depends on total height of menu) */
 /*lower size at bottom*/
-@media screen and (max-width: 48em){
+@media screen and (max-width: 1080px){
+    .paper {
+        width: 70%;
+    }
+}
+@media screen and (max-width: 768px){
     .slide_side {
         border: none;
         padding: 1rem;
@@ -1320,7 +1337,7 @@ input.sw-toggle-sq:checked + label:after {
         transition: all 0.5s cubic-bezier(1,-0.35,.59,1.23);
     }
 }
-@media screen and (max-height: 34.9375em) {}
+@media screen and (max-height: 36.250em) {}
 
 @media screen and (max-width: 480px){
     .paper_dialog.open > .paper{
@@ -1360,6 +1377,13 @@ input.sw-toggle-sq:checked + label:after {
     }
     .panel-body {
         padding: 5px;
+    }
+
+
+    input.field,
+    textarea.field,
+    select._select{
+        width: 100%;
     }
 }
 @media screen and (max-height: 768px){

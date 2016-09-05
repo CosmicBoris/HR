@@ -33,7 +33,6 @@ class WorkspaceController extends Controller
             $validator->Prepare($_POST)->CheckForEmpty();
             if(!$validator->IsError()) {
                 $event = new Event($_POST);
-                $event->class = $event->event_type;
                 $event->className = $event->event_type;
                 $event->start = date("Y-m-d H:i:s", strtotime($event->start));
                 $event->end = date("Y-m-d H:i:s", strtotime($event->end));
@@ -107,7 +106,7 @@ class WorkspaceController extends Controller
                         if($this->_model->AddCandidate($candidate, $_POST['vacancy_id'])) {
                             $response['success'] = 1;
 
-                            $this->_model->GenerateCandidatesTableContent(0, $response);
+                            $this->_model->GenerateCandidatesTableContent(["page"=>0], $response);
                         } else {
                             $response['error'] = $this->_model->getDBError();
                         }
@@ -126,6 +125,11 @@ class WorkspaceController extends Controller
         if($this->_model->UpdateCandidate(new Candidate($_POST)))
             Response::ReturnJson(['success'=>1]);
     }
+    public function actionAddPhoto()
+    {
+        $this->_model->InsertPhoto($_POST['id'], $_POST['photo']);
+    }
+
     public function actionSearchInCandidates()
     {
         $response = array();
@@ -198,7 +202,8 @@ class WorkspaceController extends Controller
     {
         $response = $this->_model->Delete('candidates', $_GET['id']);
         if($response['success'] == 1) {
-            $this->_model->GenerateCandidatesTableContent(paginationHelper::getCurrentPage(), $response);
+            $this->_model->GenerateCandidatesTableContent(
+                ["page" => paginationHelper::getCurrentPage()], $response);
         }
 
         Response::ReturnJson($response);
@@ -206,8 +211,9 @@ class WorkspaceController extends Controller
     public function actionDeleteVacancy()
     {
         $response = $this->_model->Delete('vacancies', $_GET['id']);
-        if($response['success'] == 1){
-            $this->_model->GenerateVacanciesTableContent(paginationHelper::getCurrentPage(), $response);
+        if($response['success'] == 1) {
+            $this->_model->GenerateVacanciesTableContent(
+                ["page" => paginationHelper::getCurrentPage()], $response);
         }
 
         Response::ReturnJson($response);
