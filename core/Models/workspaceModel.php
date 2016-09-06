@@ -38,7 +38,7 @@ class WorkspaceModel extends Model
             [
                 "fullname"=>$c->fullname,
                 "sex"=>$c->sex,
-                "age"=>$c->age,
+                "birthdate"=>date("Y-m-d", strtotime($c->birthdate)),
                 "profile"=>$c->profile,
                 "email"=>$c->email,
                 "phone"=>$c->phone,
@@ -54,7 +54,6 @@ class WorkspaceModel extends Model
             ])
             ->where(['id' => $id])->RunQuery();
     }
-
     function CandidatesCount($search = null)
     {
         $query = "SELECT COUNT(*) AS c FROM `candidates`".
@@ -71,7 +70,7 @@ class WorkspaceModel extends Model
     }
     function getCandidates(array $params)
     {
-        $sql = "SELECT `id`,`fullname`,`sex`,`age`,`profile`,`email`,`phone`,`photo`,`skills`,"
+        $sql = "SELECT `id`,`fullname`,`sex`,`birthdate`,`profile`,`email`,`phone`,`photo`,`skills`,"
             ."COUNT(`vc`.`candidate_id`) AS `assigned` "
             ."FROM `candidates` "
             ."LEFT JOIN `vacancies_candidates` AS `vc` ON `candidates`.`id`=`vc`.`candidate_id` "
@@ -162,6 +161,47 @@ class WorkspaceModel extends Model
     {
         return $this->dbLink->insert('vacancies_candidates',
             ['vacancy_id'=>$vacancy_id, 'candidate_id'=>$candidate_id])->RunQuery();
+    }
+
+    function getNotAssignedVacancies($candidateId) : array
+    {
+        /*SELECT * FROM vacancies WHERE `user_id`=1 AND `id` NOT IN ( SELECT `vacancy_id` FROM vacancies_candidates vc )*/
+        $query="SELECT * FROM vacancies".
+            " WHERE `user_id`=".Auth::GetUserID().
+            " AND `id` NOT IN (SELECT `vacancy_id` FROM vacancies_candidates vc)";
+        $vacancies = [];
+        if(false !== $result=$this->dbLink->ExecuteSql($query)) {
+            if(is_array($result) && is_array($result[0])) {
+                foreach ($result as $obj) {
+                    $v = new Vacancy($obj);
+                    $vacancies[] = $v;
+                }
+            } else if (is_array($result)) {
+                $v = new Vacancy($result);
+                $vacancies[] = $v;
+            }
+        }
+        return $vacancies;
+    }
+    function getNotAssignedCandidates($vacancyId) : array
+    {
+        $query="SELECT * FROM candidates c".
+            " INNER JOIN user_candidates uc ON `c`.`id`=`uc`.`candidate_id` ".
+            " WHERE `user_id`=".Auth::GetUserID().
+            " AND `c`.`id` NOT IN (SELECT `candidate_id` FROM vacancies_candidates vc)";
+        $candidates = [];
+        if(false !== $result=$this->dbLink->ExecuteSql($query)) {
+            if(is_array($result) && is_array($result[0])) {
+                foreach ($result as $obj) {
+                    $c = new Candidate($obj);
+                    $candidates[] = $c;
+                }
+            } else if (is_array($result)) {
+                $c = new Candidate($result);
+                $candidates[] = $c;
+            }
+        }
+        return $candidates;
     }
 
     function AddVacancy($vacancy, $candidate_id)

@@ -55,7 +55,7 @@ h4.header {
     border: none;
     border-top: 1px solid white;
     box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    margin-bottom: 0;
+    margin-bottom: 10px;
 }
 .form-control {
     border-radius: 0;
@@ -623,7 +623,7 @@ input.field {
     margin-top: 5px;
     margin-bottom: 5px;
     height: 31px;
-    width: 70%;
+    width: 60%;
     min-width: 280px;
 }
 textarea.field {
@@ -634,7 +634,7 @@ textarea.field {
     border-radius: 0;
     margin-top: 5px;
     margin-bottom: 5px;
-    width: 70%;
+    width: 60%;
     min-width: 280px;
     min-height: 90px;
 }
@@ -642,7 +642,7 @@ select._select{
     margin: auto;
     left:50%;
     height: 31px;
-    width: 70%;
+    width: 60%;
     min-width: 280px;
 }
 
@@ -1117,8 +1117,8 @@ table#t_info > tbody > tr > td._hi {
     letter-spacing: 1px;
 }
 table#t_info > tbody > tr > td.pad_l {
-    padding-left: 25px;
-    width: 115px;
+    padding-left: 15px;
+    width: 100px;
 }
 table#t_info > tbody > tr > td > a {
     font-style: italic;

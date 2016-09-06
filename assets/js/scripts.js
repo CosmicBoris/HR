@@ -1,6 +1,11 @@
 /**
  * Created by boris on 08.03.2016.
  */
+var App = function(){
+    
+}();
+
+
 var mouseStartX, mouseEndX, nInterval, currentRow, url, id, searchTimer, backUp;
 var needReload = false;
 $(document).ready(function()
@@ -97,11 +102,13 @@ $(document).ready(function()
                     $('[data-name="name"]').html(formElements.fullname.value);
                     $('td[data-name="phone"]').html(formElements.phone.value);
                     $('a[data-name="email"]').attr('href', "mailto:"+formElements.email.value).html(formElements.email.value);
-                    $('td[data-name="age"]').html("AGE: "+formElements.age.value);
-                    $('td[data-name="sex"]').html("GENDER: " + (formElements.sex.value == 1 ? "Male" : "Female"));
+                    $('td[data-name="birthdate"]').html(formElements.birthdate.value + "  /  AGE: "+
+                    CalculateAge(formElements.birthdate.value));
+                    $('td[data-name="sex"]').html((formElements.sex.value == 1 ? "Male" : "Female"));
                     $('a[data-name="profile"]').attr('href', formElements.profile.value);
-                    $("#target_tag").tagsinput('removeAll');
-                    $("#target_tag").tagsinput('add', $("#source_tag").val());
+                    var ti = $("#target_tag");
+                    ti.tagsinput('removeAll');
+                    ti.tagsinput('add', $("#source_tag").val());
 
                     $("#edit_entry").removeClass('open');
                 } else if (!data.success) {
@@ -217,6 +224,19 @@ $(document).ready(function()
     });
 });
 
+/*source http://stackoverflow.com/questions/10008050/get-age-from-birthdate*/
+function CalculateAge(dateString)
+{
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
 function HandlePhotoUpload(e){
     var file = e.target.files[0];
     if (file) {
@@ -249,7 +269,7 @@ function HandlePhotoUpload(e){
                 type: 'POST',
                 url: '/Workspace/AddPhoto',
                 data: {
-                    id: id,
+                    id: $("h2.info").attr("data-id"),
                     photo: imgData
                 }
             }).done( function(data ){
@@ -258,7 +278,6 @@ function HandlePhotoUpload(e){
             }).fail( function(){
                 alert("error");
             });
-
         };
         var reader = new FileReader();
         reader.onload = function(event){
@@ -266,23 +285,6 @@ function HandlePhotoUpload(e){
         };
         reader.readAsDataURL(file);
     }
-        /*var fd = new FormData(document.querySelector("#fUpload"));
-         App.loadingScreen(true);
-         $.ajax({
-         url: "Home/Upload",
-         type: "POST",
-         data: fd,
-         dataType: "json",
-         processData: false,  // tell jQuery not to process the data
-         contentType: false   // tell jQuery not to set contentType
-         }).done(function(response){
-         App.VaultData = response;
-         $("#welcome").remove();
-         App.PrepareUI();
-         }).fail(function(xhr, status, error) {
-         alert(error.message);
-         }).always(App.loadingScreen(false));
-         }*/
 }
 
 function Login()

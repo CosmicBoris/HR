@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div id="Candidate_info">
-        <h2 class="info" data-name="name"><?=$this->candidate->fullname?></h2>
+        <h2 class="info" data-name="name" data-id="<?=$this->candidate->id?>"><?=$this->candidate->fullname?></h2>
 
         <? if(isset($_GET['ajax'])):?>
         <button id="goBack" class="button button--rect button--size-m">
@@ -24,7 +24,7 @@
             <table id="t_info">
                 <tbody>
                 <tr>
-                    <td id="photo_container" rowspan="3">
+                    <td id="photo_container" rowspan="4">
                         <div id="profile_photo">
                             <img src="<?=$this->candidate->photo ?? "/assets/svg/no_photo.svg"?>" height="128" width="128">
                             <span id="fdOpen" class="glyphicon glyphicon-cloud-upload"></span>
@@ -41,16 +41,21 @@
                     <td class="pad_l _hi" >EMAIL:</td>
                     <td><a href="mailto:<?=$this->candidate->email?>" data-name="email"><?=$this->candidate->email?></a></td>
                 </tr>
-                <tr class="text-center">
-                    <td><a data-name="profile" href="<?=$this->candidate->profile ?? ""?>" target="_blank">Web profile</a></td>
+                <tr>
+                    <td class="pad_l _hi">GENDER:</td>
+                    <td data-name="sex"><?=$this->candidate->sex ? "Male" : "Female"?></td>
                 </tr>
-                <tr class="text-center">
-                    <td data-name="age">AGE: <?=$this->candidate->age?></td>
-                    <td data-name="sex">GENDER: <?=$this->candidate->sex ? "Male" : "Female"?></td>
+                <tr>
+                    <td  class="text-center"><a data-name="profile" href="<?=$this->candidate->profile ?? ""?>" target="_blank">Web profile</a></td>
+                    <td class="pad_l _hi">Birth date:</td>
+                    <td data-name="birthdate"><?=$this->candidate->birthdate !== null ?
+                            date('j F Y', strtotime($this->candidate->birthdate)).'  /  Age: '.
+                            date_diff(date_create($this->candidate->birthdate), date_create('today'))->y : ""?>
+                    </td>
                 </tr>
                 <tr class="text-center">
                     <td class="_hi">SKILLS:</td>
-                    <td colspan="2">
+                    <td colspan="3">
                         <input id="target_tag" data-role="tagsinput" type="text" value="<?=$this->candidate->skills?>">
                     </td>
                 </tr>
@@ -137,7 +142,7 @@
                             </ul>
                         </div>
 
-                        <p><input class="field" type="number" min="14" max="90" name="age" placeholder="Age" value="<?=$this->candidate->age?>"></p>
+                        <p><input type="text" size="16" name="birthdate" placeholder="Birth date" class="datetime field" value="<?=$this->candidate->birthdate?>" readonly></p>
 
                         <label for="skills">Key skills:</label>
                         <p><input id="source_tag" type="text" name="skills" data-role="tagsinput" value="<?=$this->candidate->skills?>"></p>
@@ -152,5 +157,12 @@
     <script>
         document.title = "Candidate <?=$this->candidate->fullname?>";
         InitTagsInput();
+        $(".datetime").datetimepicker({
+            format: "dd MM yyyy",
+            startView: 4,
+            minView: 2,
+            autoclose: true,
+            todayBtn: false
+        });
     </script>
 </div>

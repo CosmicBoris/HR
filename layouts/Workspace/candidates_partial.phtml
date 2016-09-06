@@ -35,7 +35,7 @@
                         </ul>
                     </div>
 
-                    <p><input class="field" type="number" min="14" max="90" name="age" placeholder="Age"></p>
+                    <p><input type="text" size="16" name="birthdate" placeholder="Birth date" class="datetime field" readonly></p>
 
                     <label for="skills">Key skills:</label>
                     <p><input type="text" name="skills" data-role="tagsinput" maxlength="256"></p>
@@ -115,4 +115,11 @@
 <script>
     document.title = "Candidates";
     InitTagsInput();
+    $(".datetime").datetimepicker({
+        format: "dd MM yyyy",
+        startView: 4,
+        minView: 2,
+        autoclose: true,
+        todayBtn: false
+    });
 </script>

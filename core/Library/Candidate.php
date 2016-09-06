@@ -12,7 +12,7 @@ class Candidate extends Init
         $id,
         $fullname,
         $sex,
-        $age,
+        $birthdate,
         $profile,
         $email,
         $phone,

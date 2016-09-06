@@ -95,11 +95,12 @@ class WorkspaceController extends Controller
         if($this->isPost()) {
             $response = array();
             $validator = Validator::GetInstance();
-            $validator->Prepare($_POST, ["fullname", "phone", "age", "skills", "sex"])->CheckForEmpty();
+            $validator->Prepare($_POST, ["fullname", "phone", "email", "skills", "sex"])->CheckForEmpty();
             if(!$validator->IsError()){
                 if($validator->CheckEmail('email'))
                 {
                     $candidate = new Candidate($validator->GetAllFields());
+                    $candidate->birthdate = date("Y-m-d", strtotime($candidate->birthdate));
 
                     if(!$response['warning'] = $this->_model->FindCandidate($candidate))
                     {
@@ -124,6 +125,8 @@ class WorkspaceController extends Controller
     {
         if($this->_model->UpdateCandidate(new Candidate($_POST)))
             Response::ReturnJson(['success'=>1]);
+        else
+            Response::ReturnJson(['warning'=>"critical error occurred Server internal error e32f22 > Shutdown"]);
     }
     public function actionAddPhoto()
     {
