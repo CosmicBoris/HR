@@ -10,8 +10,81 @@
 
     </div>
 
-    <div class="row spacer">
+    <div class="row spacer grid">
+            <div class="panel grid panel-default">
+                        <div class="panel-heading-pure">
+                            <h4 class="header text-center">Vacancy info:</h4>
+
+                            <div class="pull-right">
+                                <button id="btn_edit" class="button button--rayen button--size-s" data-text="Edit"><span class="glyphicon glyphicon-edit"></span></button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <table id="t_info">
+                            <tbody>
+                            <tr>
+                                <td class="pad_l _hi">Title:</td>
+                                <td data-name="title"><?=$this->vacancy->title?></td>
+                            </tr>
+                            <tr>
+                                <td class="pad_l _hi">Created:</td>
+                                <td data-name="date_added"><?=$this->vacancy->date_added?></td>
+                                <td class="pad_l _hi">State:</td>
+                                <td data-name="state"><?=$this->vacancy->state == 1 ? "Opened":"Closed"?></td>
+                            </tr>
+                            <tr>
+                                <td class="pad_l _hi" >Description:</td>
+                                <td data-name="description" class="text-center" rowspan="3" colspan="3"><?=$this->vacancy->description?></td>
+                            </tr>
+                            <tr>
+                            </tr>
+                            <tr>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+            <div class="panel grid panel-default">
+                        <div class="panel-heading-pure">
+                            <h4 class="header text-center">Assigned candidates:</h4>
+                            <div class="pull-right">
+                                <button  class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="scroll" data-height="220">
+                            <ul>
+                                <?php
+                                foreach ($this->assignedCandidates as $c):
+                                    ?>
+                                    <li>
+                                        <ul>
+                                            <li><?=$c->N?></li>
+                                            <li><?=$c->fullname?></li>
+                                            <li><?=$c->email?></li>
+                                            <li><?=$c->phone?></li>
+                                            <li><?=$c->assigned?></li>
+                                        </ul>
+                                    </li>
+                                    <?php
+                                endforeach;
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
+            <div class="panel grid panel-default">
+                        <div class="panel-heading-pure">
+                            <h4 class="header text-center">Timeline</h4>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="scroll" data-height="224">
+                            date_added
+                        </div>
+                    </div>
+    </div>
+
+    <!--<div class="row spacer">
         <div class="col-md-6">
+
             <div class="panel panel-default">
                 <div class="panel-heading-pure">
                     <h4 class="header text-center">Vacancy info:</h4>
@@ -25,17 +98,17 @@
                     <tbody>
                     <tr>
                         <td class="pad_l _hi">Title:</td>
-                        <td data-name="title"><?=$this->vacancy->title?></td>
+                        <td data-name="title"><?/*=$this->vacancy->title*/?></td>
                     </tr>
                     <tr>
                         <td class="pad_l _hi">Created:</td>
-                        <td data-name="date_added"><?=$this->vacancy->date_added?></td>
+                        <td data-name="date_added"><?/*=$this->vacancy->date_added*/?></td>
                         <td class="pad_l _hi">State:</td>
-                        <td data-name="state"><?=$this->vacancy->state == 1 ? "Opened":"Closed"?></td>
+                        <td data-name="state"><?/*=$this->vacancy->state == 1 ? "Opened":"Closed"*/?></td>
                     </tr>
                     <tr>
                         <td class="pad_l _hi" >Description:</td>
-                        <td data-name="description" class="text-center" rowspan="3" colspan="3"><?=$this->vacancy->description?></td>
+                        <td data-name="description" class="text-center" rowspan="3" colspan="3"><?/*=$this->vacancy->description*/?></td>
                     </tr>
                     <tr>
                     </tr>
@@ -44,8 +117,10 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
         <div class="col-md-6">
+
             <div class="panel panel-default">
                 <div class="panel-heading-pure">
                     <h4 class="header text-center">Assigned candidates:</h4>
@@ -57,25 +132,27 @@
                 <div class="scroll" data-height="220">
                     <ul>
                         <?php
-                        foreach ($this->assignedCandidates as $c):
-                            ?>
+/*                        foreach ($this->assignedCandidates as $c):
+                            */?>
                             <li>
                                 <ul>
-                                    <li><?=$c->N?></li>
-                                    <li><?=$c->fullname?></li>
-                                    <li><?=$c->email?></li>
-                                    <li><?=$c->phone?></li>
-                                    <li><?=$c->assigned?></li>
+                                    <li><?/*=$c->N*/?></li>
+                                    <li><?/*=$c->fullname*/?></li>
+                                    <li><?/*=$c->email*/?></li>
+                                    <li><?/*=$c->phone*/?></li>
+                                    <li><?/*=$c->assigned*/?></li>
                                 </ul>
                             </li>
                             <?php
-                        endforeach;
-                        ?>
+/*                        endforeach;
+                        */?>
                     </ul>
                 </div>
             </div>
+
         </div>
         <div class="col-md-6">
+
             <div class="panel panel-default">
                 <div class="panel-heading-pure">
                     <h4 class="header text-center">Timeline</h4>
@@ -85,8 +162,9 @@
                     date_added
                 </div>
             </div>
+
         </div>
-    </div>
+    </div>-->
 
     <div id="edit_entry" class="paper_dialog">
         <div id="editVacancy" class="paper">
@@ -123,7 +201,6 @@
             </div>
         </div>
     </div>
-
     <script>
         document.title = "Vacancy <?=$this->vacancy->title?>";
     </script>
