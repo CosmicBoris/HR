@@ -2,7 +2,7 @@
     <div class="paper">
         <div class="box clearfix">
             <h3>new event</h3>
-            <input type="button" id="btnAdd" class="btn-add-trigger" value="ADD">
+            <input type="button" id="btnAddEvent" class="btn-add-trigger" value="ADD">
             <div class="clearfix"></div>
             <h5></h5>
             <hr>
@@ -83,7 +83,14 @@
                 <h3 class="info">Events:</h3>
             </div>
             <div class="panel-body">
-
+                <div id='external-events'>
+                    <h4>Draggable Events</h4>
+                    <div class='fc-event'>My Event 1</div>
+                    <div class='fc-event'>My Event 2</div>
+                    <div class='fc-event'>My Event 3</div>
+                    <div class='fc-event'>My Event 4</div>
+                    <div class='fc-event'>My Event 5</div>
+                </div>
             </div>
         </div>
 
@@ -108,6 +115,23 @@
 
     InitDateTime(".form_datetime");
 
+    $('#external-events .fc-event').each(function() {
+
+        // store data so the calendar knows to render an event upon drop
+        $(this).data('event', {
+            title: $.trim($(this).text()), // use the element's text as the event title
+            stick: true // maintain when user navigates (see docs on the renderEvent method)
+        });
+
+        // make the event draggable using jQuery UI
+        $(this).draggable({
+            zIndex: 999,
+            revert: true,      // will cause the event to go back to its
+            revertDuration: 0  //  original position after the drag
+        });
+
+    });
+
     $('#fullcalendar').fullCalendar({
         events: '/workspace/Feed',
         firstDay: 1,
@@ -118,6 +142,19 @@
             left: 'prev,today,next',
             center: 'title',
             right: 'month,basicWeek,agendaDay'
+        },
+        editable: true,
+        droppable: true,
+        drop: function() {
+            $(this).remove();
+        },
+        eventClick: function(event, jsEvent, view) {
+            var str = "";
+            for (var key in event) {
+                var value = event[key];
+                str += key+': ' + value+'\r\n';
+            }
+            alert(str);
         }
     });
 </script>

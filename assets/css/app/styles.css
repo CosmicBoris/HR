@@ -1073,13 +1073,22 @@ button#goBack {
 
 
 .event-interview {
-    background-color: #f7f7f7;
-    color: #0f0f0f;
-    /*background-color: #1b6d85;*/
+    background-color: #000;
+    color: #fff;
+    font-size: .85em;
+    line-height: 1.5;
+    border-radius: 1px;
+    border: 0 !important;
+    font-weight: 400;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 .event-interview:hover {
     background-color: #e0e0e0;
     color: #0f0f0f;
+
+    -webkit-transition: background 0.5s, color 0.5s;
+    -moz-transition: background 0.5s, color 0.5s;
+    transition: background 0.5s, color 0.5s;
 }
 
 .col-md-12, .col-xs-12, .col-sm-12, .col-lg-12 {

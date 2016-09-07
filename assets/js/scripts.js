@@ -68,27 +68,8 @@ $(document).ready(function()
                 $(this).removeClass('open');
             }
         })
-        .on('click', "#btnAdd", function() {
-            var formObj = $('#form_new_entry');
-
-        $.ajax({
-            type: 'POST',
-            url: formObj.attr('action'),
-            data: formObj.serialize()
-        }).done( function(data ){
-            if(data.success == 1) {
-                $("#new_entry").removeClass('open');
-                $('.badge.badge-primary').text(data.vCount);
-                $(".table>tbody").html(data.table);
-                $(".pull-right>.pagination").detach();
-                $(".table-responsive").after(data.pagination);
-            } else if (!data.success) {
-                $("#new_entry").find('h5').text(data.warning);
-            }
-        }).fail( function(){
-            alert("error");
-        });
-    })
+        .on('click', "#btnAdd", HandleNewEntry)
+        .on('click', "#btnAddEvent", HandleNewEvent)
         .on('click', "#btnSaveCan", function(){
             var formObj = $('#form_edit_entry');
             var formElements = document.forms['editCan'].elements;
@@ -286,7 +267,46 @@ function HandlePhotoUpload(e){
         reader.readAsDataURL(file);
     }
 }
+function HandleNewEntry(e)
+{
+    var formObj = $('#form_new_entry');
 
+    $.ajax({
+        type: 'POST',
+        url: formObj.attr('action'),
+        data: formObj.serialize()
+    }).done( function(data ){
+        if(data.success == 1) {
+            $("#new_entry").removeClass('open');
+            $('.badge.badge-primary').text(data.vCount);
+            $(".table>tbody").html(data.table);
+            $(".pull-right>.pagination").detach();
+            $(".table-responsive").after(data.pagination);
+        } else if (!data.success) {
+            $("#new_entry").find('h5').text(data.warning);
+        }
+    }).fail( function() {
+        alert("error");
+    });
+}
+function HandleNewEvent()
+{
+    var formObj = $('#form_new_entry');
+    $.ajax({
+        type: 'POST',
+        url: formObj.attr('action'),
+        data: formObj.serialize()
+    }).done( function(data ){
+        if(data.success == 1) {
+            $("#new_entry").removeClass('open');
+            $('#fullcalendar').fullCalendar('refetchEvents');
+        } else if (!data.success) {
+            $("#new_entry").find('h5').text(data.warning);
+        }
+    }).fail( function() {
+        alert("error");
+    });
+}
 function Login()
 {
     if(!$("#pblogin").hasClass('open') || $(".lg-buttons").hasClass('inactive')) {return;}
