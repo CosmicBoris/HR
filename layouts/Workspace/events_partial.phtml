@@ -39,11 +39,63 @@
     </div>
 </div>
 
+<div id="show_entry" class="paper_dialog">
+    <div class="paper">
+        <div class="box clearfix">
+            <h3 data-name="event_type"></h3>
+            <a href="#" class="popupbox-close"></a>
+            <div class="clearfix"></div>
+            <hr>
+                <table id="t_info" class="table_info">
+                    <tbody>
+                    <tr>
+                        <td class="pad_l _hi">Title:</td>
+                        <td data-name="title" colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td class="pad_l _hi">Created:</td>
+                        <td data-name="created"></td>
+                    </tr>
+                    <tr>
+                        <td class="pad_l _hi">Event start:</td>
+                        <td data-name="start"></td>
+                        <td class="pad_l _hi">Event end:</td>
+                        <td data-name="end"></td>
+                    </tr>
+                    <tr>
+                        <td class="pad_l _hi">Description:</td>
+                        <td data-name="description" class="text-center" rowspan="3" colspan="3">Young attractive woman.</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                    </tr>
+                    </tbody>
+                </table>
+            <div id="vacancy_info">
+
+            </div>
+            <div id="candidate_info">
+
+            </div>
+            <br>
+            <div class="fc-right">
+                <div class="fc-button-group">
+                    <button type="button" class="button_b button--size-xs">Done</button>
+                    <button type="button" class="button_b button--size-xs">week</button>
+                    <button type="button" class="button_b button--size-xs">remove</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div class="row spacer">
     <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="clr">
             <div>
-                <h3>Interviews</h3>
+                <h3>Interviews <span class="badge badge-primary">0</span></h3>
                 <p id="s1_data"></p>
                 <button id="plus_one" class="button button--rayen button--size-s mob-right" data-text="+1"><span>Add new</span></button>
             </div>
@@ -84,12 +136,14 @@
             </div>
             <div class="panel-body">
                 <div id='external-events'>
-                    <h4>Draggable Events</h4>
-                    <div class='fc-event'>My Event 1</div>
-                    <div class='fc-event'>My Event 2</div>
-                    <div class='fc-event'>My Event 3</div>
-                    <div class='fc-event'>My Event 4</div>
-                    <div class='fc-event'>My Event 5</div>
+                    <form class="inline-form">
+                        <input type="text" value="" placeholder="Event Title..." id="event_title"/><br/>
+                        <button id="event_add" class="btn btn-dark" type="button">Add Event</button>
+                    </form>
+                    <hr/>
+                        <div id="event_box">
+
+                        </div>
                 </div>
             </div>
         </div>
@@ -114,47 +168,6 @@
     document.title = "Events";
 
     InitDateTime(".form_datetime");
-
-    $('#external-events .fc-event').each(function() {
-
-        // store data so the calendar knows to render an event upon drop
-        $(this).data('event', {
-            title: $.trim($(this).text()), // use the element's text as the event title
-            stick: true // maintain when user navigates (see docs on the renderEvent method)
-        });
-
-        // make the event draggable using jQuery UI
-        $(this).draggable({
-            zIndex: 999,
-            revert: true,      // will cause the event to go back to its
-            revertDuration: 0  //  original position after the drag
-        });
-
-    });
-
-    $('#fullcalendar').fullCalendar({
-        events: '/workspace/Feed',
-        firstDay: 1,
-        fixedWeekCount: false,
-        aspectRatio: 2.1,
-
-        header: {
-            left: 'prev,today,next',
-            center: 'title',
-            right: 'month,basicWeek,agendaDay'
-        },
-        editable: true,
-        droppable: true,
-        drop: function() {
-            $(this).remove();
-        },
-        eventClick: function(event, jsEvent, view) {
-            var str = "";
-            for (var key in event) {
-                var value = event[key];
-                str += key+': ' + value+'\r\n';
-            }
-            alert(str);
-        }
-    });
+    InitSlimScroll(".scroll");
+    Calendar.init();
 </script>

@@ -32,22 +32,19 @@ $(document).ready(function()
         }
     })
         .on('click', ".popupbox", function(event) {  //  send login | close popup
-
             var etarget = $(event.target);
 
-        if( etarget.is('.popupbox-close') || etarget.is('.popupbox') || etarget.is('#pub_no'))
-        {
-            event.preventDefault();
-            if(etarget.attr('data-attr') != 'glued')
-                $(this).removeClass('open');
+            if( etarget.is('.popupbox-close') || etarget.is('.popupbox') || etarget.is('#pub_no')) {
+                event.preventDefault();
+                if(etarget.attr('data-attr') != 'glued')
+                    $(this).removeClass('open');
 
-        } else if (etarget.is('#btnLogin')) {
-            Login();
-        }
-    })
+            } else if (etarget.is('#btnLogin')) {
+                Login();
+            }
+        })
         .on('click', "#plus_one",function() {
             var elm = $("#new_entry");
-
             elm.find('h5').text("");
             elm.find('form').find("input[type=text], textarea").val("");
             elm.addClass('open');
@@ -62,9 +59,14 @@ $(document).ready(function()
                 if(inputs.length > 0)
                     inputs.tagsinput('removeAll');
             }
-    })
+        })
         .on('click', "#edit_entry", function(evn) {
             if(evn.target == this) {
+                $(this).removeClass('open');
+            }
+        })
+        .on('click', "#show_entry", function(evn) {
+            if(evn.target == this || $(evn.target).is('.popupbox-close')) {
                 $(this).removeClass('open');
             }
         })
@@ -217,8 +219,8 @@ function CalculateAge(dateString)
     }
     return age;
 }
-
-function HandlePhotoUpload(e){
+function HandlePhotoUpload(e)
+{
     var file = e.target.files[0];
     if (file) {
         var cv = document.createElement("canvas");
@@ -613,3 +615,200 @@ function deleteAllCookies()
 }
 /*for(var key in formData)
  $("#t_info").find("td[data-name*='"+key+"']" ).text(formData[key]);*/
+
+
+var Calendar = function()
+{
+    var _calendar, _paper_info, cWidth = 0;
+    var NotifyServer = function(data, undoFn)
+    {
+        $.ajax({
+            type: 'POST',
+            url: '/workspace/UpdateEvent',
+            data: data
+        }).done( function(responce){
+            if(responce.success == 1) {
+
+            } else if (!responce.success) {
+                undoFn();
+                alert("Not s");
+            }
+        }).fail( function() {
+            undoFn();
+            alert("Server error, can`t save changes");
+        });
+    };
+    var openInfo = function()
+    {
+        _paper_info.addClass('open');
+    };
+    var eventAdditionalData = function(data)
+    {
+        var html = "";
+        html += '<hr><h3>On vacancy:</h3><table class="table_info"><tbody><tr><td class="pad_l _hi">Title:</td><td colspan="3">'
+            +data.vacancy.title
+            +'</td></tr><tr><td class="pad_l _hi">Created:</td><td>'
+            +data.vacancy.date_added
+            +'</td><td class="pad_l _hi">State:</td><td>'
+            +(data.vacancy.state == 1 ? "Opened":"Closed")
+            +'</td></tr><tr><td class="pad_l _hi">Description:</td>'
+            +'<td class="text-center" rowspan="3" colspan="3">'
+            +data.vacancy.description
+            +'</td></tr><tr></tr><tr></tr></tbody></table>'
+            +'<hr><h3>With candidate:</h3>'
+            +'<table class="table_info"><tbody><tr><td id="photo_container" rowspan="4"><div id="profile_photo">'
+            +'<img src="'
+            +(data.candidate.photo ? data.candidate.photo : "/assets/svg/no_photo.svg")
+            +'" height="128" width="128"></div></td><td class="pad_l _hi">NAME:</td><td>'
+            +data.candidate.fullname+'</td></tr><tr><td class="pad_l _hi">PHONE:</td><td>'
+            +data.candidate.phone+'</td></tr><tr><td class="pad_l _hi" >EMAIL:</td>'
+            +'<td><a href="mailto:'+data.candidate.email+'">'+data.candidate.email+'</a></td>'
+            +'</tr><tr><td class="pad_l _hi">GENDER:</td><td>'+(data.candidate.sex ? "Male" : "Female")
+            +'</td></tr><tr><td class="text-center"><a data-name="profile" href="'
+            +(data.candidate.profile ? data.candidate.profile : "")
+            +'" target="_blank">Web profile</a></td><td class="pad_l _hi">Birth date:</td><td>'
+            +data.candidate.birthdate
+            +'</td></tr></tbody></table>';
+
+
+        $("#vacancy_info").html(html);
+
+        openInfo();
+    };
+
+    return {
+        init: function() {
+            Calendar.initCalendar();
+        },
+        initCalendar: function() {
+            if (!jQuery().fullCalendar) {
+                return;
+            }
+            _calendar = $('#fullcalendar');
+            _paper_info = $("#show_entry");
+
+            if (_calendar.parents(".panel-body").width() <= 720)
+                _calendar.addClass("mobile");
+            else
+                _calendar.removeClass("mobile");
+
+            var initDrag = function(el)
+            {
+                var eventObject = {
+                    title: $.trim($(this).text()), // use the element's text as the event title
+                    stick: true // maintain when user navigates (see docs on the renderEvent method)
+                };
+                el.data('event', eventObject);
+                el.draggable({
+                    zIndex: 999,
+                    revert: true,
+                    revertDuration: 0
+                });
+            };
+
+            var addEvent = function(title) {
+                title = title.length === 0 ? "Untitled Event" : title;
+                var html = $('<div class="external-event" data-class="event-meeting">' + title + '</div>');
+                $('#event_box').append(html);
+                initDrag(html);
+            };
+
+            $('#event_add').off('click').click(function() {
+                var title = $('#event_title').val();
+                addEvent(title);
+            });
+
+            $( window ).resize(function(event) {
+                if(event.target.innerWidth > cWidth + 10 || event.target.innerWidth < cWidth - 10){
+                    var ar =  Math.floor(event.target.innerWidth / 940);
+                    ar = ar > 1 ? ar : 1;
+                    _calendar.fullCalendar('option', 'aspectRatio', ar);
+                    cWidth = event.target.innerWidth;
+                }
+            });
+
+            _calendar.fullCalendar({
+                events: '/workspace/Feed',
+                firstDay: 1,
+                timeFormat: 'H(:mm)',
+                slotLabelFormat: [
+                    'ddd D/M',
+                    'H:mm'
+                ],
+                minTime: "06:00:00",
+                maxTime: "21:00:00",
+                snapDuration:1,
+                fixedWeekCount: false,
+                aspectRatio: 2.1,
+                header: {
+                    left: 'prev,today,next',
+                    center: 'title',
+                    right: 'month,basicWeek,agendaDay'
+                },
+                editable: true,
+                droppable: true,
+                eventClick: function(event, jsEvent, view)
+                {
+                    var str = "";
+                    for (var key in event) {
+                        var value = event[key];
+                        str += key+': ' + value+'\r\n';
+                    }
+
+                    var tinfo = $("#t_info");
+                    $('h3[data-name="event_type"]').html(event.event_type);
+                    tinfo.find('[data-name="title"]').html(event.title);
+                    tinfo.find('[data-name="created"]').html(event.created);
+                    tinfo.find('[data-name="start"]').html(event.start.format("YYYY-MM-DD HH:mm"));
+                    tinfo.find('[data-name="end"]').html(event.end.format("YYYY-MM-DD HH:mm"));
+                    tinfo.find('[data-name="description"]').html(event.description);
+
+                    if(event.event_type.length && event.event_type == 'event-interview')
+                    {
+                        var url = '/workspace/VacancyCandidateData?candidate_id=' +event.candidate_id
+                            + '&vacancy_id='+event.vacancy_id;
+                        GetJsonResponse(url, eventAdditionalData);
+                    }
+                    else
+                    {
+                        openInfo();
+                    }
+
+                },
+                drop: function(date, allDay)
+                {
+                    var $this = $(this),
+                        eventObject = {
+                            title: $this.text(),
+                            start: date,
+                            allDay: allDay,
+                            className: $(this).attr("data-class")
+                        };
+
+                    _calendar.fullCalendar('renderEvent', eventObject, true);
+
+                    $this.remove();
+                },
+                eventDrop: function(event, delta, revertFunc)
+                {
+                    var eventData = {
+                        id: event.id,
+                        start: event.start.format("YYYY-MM-DD HH:mm:ss")
+                    };
+                    if('end' in event && event.end !== null)
+                        eventData.end = event.end.format("YYYY-MM-DD HH:mm:ss");
+
+                    NotifyServer(eventData, revertFunc);
+                },
+                eventResize: function(event, delta, revertFunc)
+                {
+                    var eventData = {
+                        id: event.id,
+                        end: event.end.format("YYYY-MM-DD HH:mm:ss")
+                    };
+                    NotifyServer(eventData, revertFunc);
+                }
+            });
+        }
+    };
+}();

@@ -20,7 +20,7 @@
                             </div>
                             <div class="clearfix"></div>
                         </div>
-                        <table id="t_info">
+                        <table id="t_info" class="table_info">
                             <tbody>
                             <tr>
                                 <td class="pad_l _hi">Title:</td>
@@ -47,7 +47,7 @@
                         <div class="panel-heading-pure">
                             <h4 class="header text-center">Assigned candidates:</h4>
                             <div class="pull-right">
-                                <button  class="button button--rayen button--size-s" data-text="+1"><span>Add new</span></button>
+                                <button  class="button button-st button--size-s" data-text="+1"><span>Add new</span></button>
                             </div>
                             <div class="clearfix"></div>
                         </div>
@@ -58,11 +58,11 @@
                                     ?>
                                     <li>
                                         <ul>
-                                            <li><?=$c->N?></li>
+                                            <li><?=$c->id?></li>
                                             <li><?=$c->fullname?></li>
                                             <li><?=$c->email?></li>
                                             <li><?=$c->phone?></li>
-                                            <li><?=$c->assigned?></li>
+                                            <li><?=$c->sex?></li>
                                         </ul>
                                     </li>
                                     <?php

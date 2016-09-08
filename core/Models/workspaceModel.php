@@ -203,6 +203,40 @@ class WorkspaceModel extends Model
         }
         return $candidates;
     }
+    function GetAssignedVacancies(int $cId)
+    {
+        $result = $this->dbLink->select('vacancies_candidates',
+            ['id', 'user_id', 'title', 'state', 'date_added', 'description'])
+            ->innerJoin('vacancies', ['vacancy_id'=>'id'])
+            ->where(['user_id'=>Auth::GetUserID(), "state" => "1", 'candidate_id'=>$cId], "=", "AND")
+            ->RunQuery();
+
+        $vacancies = [];
+        if ($result !== false) {
+            while ($obj = $result->fetch_assoc()) {
+                $vac = new Vacancy($obj);
+                $vacancies[]= $vac;
+            }
+        }
+        return $vacancies;
+    }
+    function GetAssignedCandidates(int $vacancyId) : array
+    {
+        $result = $this->dbLink->select('vacancies_candidates',
+            ['id','fullname','sex','birthdate','email','phone','photo'])
+            ->innerJoin('candidates', ['candidate_id'=>'id'])
+            ->where(['vacancy_id'=>$vacancyId])
+            ->RunQuery();
+
+        $candidates = [];
+        if ($result !== false) {
+            while ($obj = $result->fetch_assoc()) {
+                $can = new Candidate($obj);
+                $candidates[]= $can;
+            }
+        }
+        return $candidates;
+    }
 
     function AddVacancy($vacancy, $candidate_id)
     {
@@ -301,23 +335,6 @@ class WorkspaceModel extends Model
         $this->PrepareRow($result, $vacancies);
         return $vacancies;
     }
-    function GetAssignedVacancies(int $candidateId)
-    {
-        $result = $this->dbLink->select('vacancies_candidates',
-            ['id', 'user_id', 'title', 'state', 'date_added', 'description'])
-            ->innerJoin('vacancies', ['vacancy_id'=>'id'])
-            ->where(['user_id'=>Auth::GetUserID(), "state" => "1"], "=", "AND")
-            ->RunQuery();
-
-        $vacancies = [];
-        if ($result !== false) {
-            while ($obj = $result->fetch_assoc()) {
-                $vac = new Vacancy($obj);
-                $vacancies[]= $vac;
-            }
-        }
-        return $vacancies;
-    }
 
     function FindVacancy(Vacancy $v)
     {
@@ -351,6 +368,11 @@ class WorkspaceModel extends Model
         }
 
         return 1;
+    }
+    function UpdateEvent($params)
+    {
+        return $this->dbLink->update('events',$params)
+            ->where(['id' => $params['id']])->RunQuery();
     }
     
     function GenerateCandidatesTableContent($params, &$response)

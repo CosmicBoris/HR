@@ -11,6 +11,7 @@ class Event extends Init
         $id,
         $title,
         $description,
+        $created,
         $start,
         $end,
         $event_type,

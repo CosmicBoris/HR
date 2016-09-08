@@ -57,11 +57,12 @@ class WorkspaceController extends Controller
 
         Response::ReturnJson($events);
     }
-    public function actionCalFeed()
+    public function actionUpdateEvent()
     {
-        $start = $_REQUEST['from'] / 1000;
-        $end   = $_REQUEST['to']   / 1000;
-        
+        if($this->_model->UpdateEvent($_POST))
+            Response::ReturnJson(['success'=>1]);
+        else
+            Response::ReturnJson(['warning'=>"critical error occurred Server internal error e32f22 > Shutdown"]);
     }
 
     public function actionCandidateInfo()
@@ -133,15 +134,10 @@ class WorkspaceController extends Controller
         $this->_model->InsertPhoto($_POST['id'], $_POST['photo']);
     }
 
-    public function actionSearchInCandidates()
-    {
-        $response = array();
-    }
-
     public function actionVacancyInfo()
     {
         $this->_view->vacancy = $this->_model->getVacancy($_GET['id']);
-        $this->_view->assignedCandidates = [];
+        $this->_view->assignedCandidates = $this->_model->GetAssignedCandidates($_GET['id']);
         $this->_view->render();
     }
     public function actionVacancies()
@@ -221,6 +217,22 @@ class WorkspaceController extends Controller
 
         Response::ReturnJson($response);
     }
+    public function actionDeleteEvent()
+    {
+        $response = $this->_model->Delete('events', $_GET['id']);
+        Response::ReturnJson($response);
+    }
+
+    public function actionVacancyCandidateData()
+    {
+        $response['candidate'] = $this->_model->getCandidate($_GET['candidate_id']);
+        $response['candidate']->birthdate = $response['candidate']->birthdate !== null ?
+        date('j F Y', strtotime($response['candidate']->birthdate)).'  /  Age: '.
+        date_diff(date_create($response['candidate']->birthdate), date_create('today'))->y : "";
+        $response['vacancy']   = $this->_model->getVacancy($_GET['vacancy_id']);
+        Response::ReturnJson($response);
+    }
+
 
     function GetSearchParam()
     {
