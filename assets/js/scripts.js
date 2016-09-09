@@ -302,6 +302,10 @@ function HandleNewEvent()
         if(data.success == 1) {
             $("#new_entry").removeClass('open');
             $('#fullcalendar').fullCalendar('refetchEvents');
+            if(formObj.find('input[name="event_type"]').val() == "event-interview"){
+                var els = $("#interCount");
+                els.text(parseInt(els.text()) + 1);
+            }
         } else if (!data.success) {
             $("#new_entry").find('h5').text(data.warning);
         }

@@ -30,6 +30,28 @@ class WorkspaceController extends Controller
         if($this->isPost()) {
             $response = array();
             $validator = Validator::GetInstance();
+            $validator->Prepare($_POST);
+
+            $event = new Event($_POST);
+            $event->className = $event->event_type;
+            $event->start = date("Y-m-d H:i:s", strtotime($event->start));
+            $event->end = date("Y-m-d H:i:s", strtotime($event->end));
+            $response['success'] = $this->_model->AddEvent($event);
+
+            Response::ReturnJson($response);
+        } else {
+            $this->_view->vacancies = $this->_model->getVacancies(["page" => -1]);
+            $this->_view->users = $this->_model->getCandidates(["page" => -1]);
+            $this->_view->interCount = $this->_model->EventCountByType('event-interview');
+            $this->_view->SetTitle('Events');
+            $this->_view->render();
+        }
+    }
+    public function actionEventInterview()
+    {
+        $response = [];
+        if($this->isPost()) {
+            $validator = Validator::GetInstance();
             $validator->Prepare($_POST)->CheckForEmpty();
             if(!$validator->IsError()) {
                 $event = new Event($_POST);
@@ -40,13 +62,10 @@ class WorkspaceController extends Controller
             } else {
                 $response['warning'] = "Empty fields: " . implode(', ', $validator->GetErrors()['empty']);
             }
-            Response::ReturnJson($response);
         } else {
-            $this->_view->vacancies = $this->_model->getVacancies(["page" => -1]);
-            $this->_view->users = $this->_model->getCandidates(["page" => -1]);
-            $this->_view->SetTitle('Events');
-            $this->_view->render();
+
         }
+        Response::ReturnJson($response);
     }
     public function actionFeed()
     {

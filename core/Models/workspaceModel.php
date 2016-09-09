@@ -27,7 +27,7 @@ class WorkspaceModel extends Model
                 ['user_id'=>Auth::GetUserID(), 'candidate_id'=>$candidate_id])->RunQuery();
         }
         if($vacancy_id && $result)
-            $result = $this->AssingVacancy($vacancy_id, $candidate_id);
+            $result = $this->AssignVacancy($vacancy_id, $candidate_id);
 
         $this->dbLink->commit();
         return $result;
@@ -157,7 +157,7 @@ class WorkspaceModel extends Model
         }
         return null;
     }
-    function AssingVacancy($vacancy_id, $candidate_id)
+    function AssignVacancy($vacancy_id, $candidate_id)
     {
         return $this->dbLink->insert('vacancies_candidates',
             ['vacancy_id'=>$vacancy_id, 'candidate_id'=>$candidate_id])->RunQuery();
@@ -349,21 +349,29 @@ class WorkspaceModel extends Model
     
     function AddEvent($event)
     {
-         return $this->dbLink->insert('events', $event)->RunQuery();
+        $this->dbLink->autocommit(FALSE);
+        $result = $this->dbLink->insert('events', $event)->RunQuery();
+        if($result) {
+            $event_id = $this->dbLink->lastInsertedId();
+            $result = $this->dbLink->insert('user_events',
+                ['user_id'=>Auth::GetUserID(), 'event_id'=>$event_id])->RunQuery();
+            if($result)
+                $this->dbLink->commit();
+        }
+        return $result;
     }
     function getEvents($start, $end, array &$out)
     {
         $event = new Event();
         $result = $this->dbLink->select('events', array_keys(get_object_vars($event)))
-            ->where(['start'=>$start, $end], 'BETWEEN','AND')
+            ->innerJoin('user_events', ['id'=>'event_id'])
+            ->where(['start'=>$start, $end.' AND user_id='.Auth::USERID], 'BETWEEN','AND')
             ->RunQuery();
 
         if(!$result) return 0;
 
         while($obj = $result->fetch_assoc()){
             $event = new Event($obj);
-            /*$event->start = strtotime($obj['start']) . '000';
-            $event->end   = strtotime($obj['end']) .'000';*/
             $out[] = $event;
         }
 
@@ -373,6 +381,14 @@ class WorkspaceModel extends Model
     {
         return $this->dbLink->update('events',$params)
             ->where(['id' => $params['id']])->RunQuery();
+    }
+    function EventCountByType(string $type) : int
+    {
+        $query = "SELECT COUNT(id) AS c FROM `events`".
+            " INNER JOIN `user_events` ue ON `events`.`id`=`ue`.`event_id`".
+            " WHERE `event_type`='{$type}' AND `ue`.`user_id`=".Auth::GetUserID();
+
+        return intval($this->dbLink->ExecuteSql($query)['c']);
     }
     
     function GenerateCandidatesTableContent($params, &$response)

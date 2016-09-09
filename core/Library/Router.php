@@ -33,12 +33,12 @@ class Router
 				$controller->$action_name();
     		} else {
                 $controller_name = Config::DEFAULT_CONTROLLER.'Controller';
-                $controller = new $controller_name();
+                $controller = new $controller_name($this);
                 $controller->show404();
             }
 		} else {
             $controller_name = Config::DEFAULT_CONTROLLER.'Controller';
-            $controller = new $controller_name();
+            $controller = new $controller_name($this);
 			$controller->show404();
 		}
 	}

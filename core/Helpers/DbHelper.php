@@ -4,7 +4,7 @@ final class DbHelper {
 	private $_db;
 	private $_sql;
 	private $_table;
-	private $_errors;
+	private $_errors = [];
 	/**
 	 * @return mixed
 	 */
@@ -246,7 +246,7 @@ final class DbHelper {
 		if ($this->_db->commit()) {
 			return true;
 		}
-		$this->_errors = $this->_db->error;
+		$this->_errors['commit_error'] = $this->_db->error;
 		return false;
 	}
 	public function ExecuteSql($query)
@@ -269,7 +269,7 @@ final class DbHelper {
 				}
 			} else {return 0;}
 		}
-		$this->_errors = $this->_db->error;
+		self::setErrors();
 		return false;
 	}
 	public function lastInsertedId()
@@ -320,7 +320,7 @@ final class DbHelper {
 	}
 	public function __destruct() {
 		if(!empty($this->_errors)) {
-			$this->_errors['date'] = date("Y-m-d H:i:s");
+			$this->_errors['dates'] = date("Y-m-d H:i:s");
 
             file_put_contents($_SERVER['DOCUMENT_ROOT'].Config::LOG_DIR.Config::ERROR_LOG,
                 print_r($this->_errors, TRUE), FILE_APPEND | LOCK_EX);
