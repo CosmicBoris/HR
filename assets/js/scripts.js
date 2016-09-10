@@ -805,7 +805,7 @@ var Calendar = function()
                     'ddd D/M',
                     'H:mm'
                 ],
-                minTime: "00:00:00",
+                minTime: "06:00:00",
                 maxTime: "21:00:00",
                 snapDuration:1,
                 fixedWeekCount: false,
