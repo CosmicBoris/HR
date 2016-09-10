@@ -1,0 +1,19 @@
+<div class="popupbox white" id="addUser" role="alert" data-attr="glued">
+    <div class="popupbox-container login">
+        <input type="button" id="btnAddUser" class="btn-add-trigger" value="ADD">
+        <h2>New User</h2>
+        <form id="newUser" action="/Super">
+            <h5></h5>
+            <input name="name" class="field" type="text" placeholder="NAME">
+            <input name="surname" class="field" type="text" placeholder="SURNAME">
+            <input name="email" class="field" type="email" placeholder="E-MAIL">
+            <input name="password" class="field" type="password" placeholder="PASSWORD">
+        </form>
+    </div>
+</div>
+<script src="<?=@Config::JAVAScripts_DIR?>md5.js"></script>
+<script>
+    setTimeout(function(){
+        $('#addUser').addClass('open');
+    }, 300);
+</script>

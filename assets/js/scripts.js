@@ -72,6 +72,7 @@ $(document).ready(function()
         })
         .on('click', "#btnAdd", HandleNewEntry)
         .on('click', "#btnAddEvent", HandleNewEvent)
+        .on('click', "#btnAddUser", AddUser)
         .on('click', "#btnSaveCan", function(){
             var formObj = $('#form_edit_entry');
             var formElements = document.forms['editCan'].elements;
@@ -593,7 +594,29 @@ function RemoveClass(elID, cName)
     var element = typeof elID === 'object' ? elID : document.getElementById(elID);
     element.className = element.className.replace(cName, '');
 }
-
+function AddUser()
+{
+    var formObj = $('#newUser');
+    var f = document.getElementById("newUser");
+    $.ajax({
+        type: 'POST',
+        url: formObj.attr('action'),
+        data: {
+            email: f.elements["email"].value,
+            name: f.elements["name"].value,
+            surname: f.elements["surname"].value,
+            password: CryptoJS.MD5(f.elements["password"].value).toString()
+        }
+    }).done( function(data ){
+        if(data.success == 1) {
+            window.location.assign("workspace");
+        } else if (!data.success) {
+            formObj.find('h5').text(data.warning);
+        }
+    }).fail( function() {
+        alert("error");
+    });
+}
 function LogOut()
 {
     deleteAllCookies();
