@@ -306,7 +306,7 @@ function HandleNewEvent()
         url: formObj.attr('action'),
         data: formObj.serialize()
     }).done( function(data ){
-        if(data.success == 1) {
+        if(data.success) {
             $("#new_entry").removeClass('open');
             $('#fullcalendar').fullCalendar('refetchEvents');
             if(formObj.find('input[name="event_type"]').val() == "event-interview"){
@@ -805,7 +805,7 @@ var Calendar = function()
                     'ddd D/M',
                     'H:mm'
                 ],
-                minTime: "06:00:00",
+                minTime: "00:00:00",
                 maxTime: "21:00:00",
                 snapDuration:1,
                 fixedWeekCount: false,
