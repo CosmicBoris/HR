@@ -740,12 +740,7 @@ var Calendar = function()
             _calendar = $('#fullcalendar');
             _paper_info = $("#show_entry");
 
-            if (_calendar.parents(".panel-body").width() <= 720)
-                _calendar.addClass("mobile");
-            else
-                _calendar.removeClass("mobile");
-
-            var initDrag = function(el)
+            /*var initDrag = function(el)
             {
                 var eventObject = {
                     title: $.trim($(this).text()), // use the element's text as the event title
@@ -758,16 +753,41 @@ var Calendar = function()
                     revertDuration: 0
                 });
             };
-
             var addEvent = function(title) {
                 title = title.length === 0 ? "Untitled Event" : title;
                 var html = $('<div class="external-event" data-class="event-meeting">' + title + '</div>');
                 $('#event_box').append(html);
                 initDrag(html);
             };
-
             $('#event_add').off('click').click(function() {
                 var title = $('#event_title').val();
+                addEvent(title);
+            });*/
+
+
+            var initDrag = function(el) {
+                var eventObject = {
+                    title: $.trim(el.text()) // use the element's text as the event title
+                };
+                el.data('eventObject', eventObject);
+                el.draggable({
+                    zIndex: 999,
+                    revert: true, // will cause the event to go back to its
+                    revertDuration: 0 //  original position after the drag
+                });
+            };
+
+            var addEvent = function(title) {
+                title = title.length === 0 ? "Untitled Event" : title;
+                var html = $('<div class="external-event label label-default" data-class="event-meeting" data-event="1" data-duration="01:00">' + title + '</div>');
+                jQuery('#event_box').append(html);
+                initDrag(html);
+            };
+
+            $('#event_add').unbind('click').click(function() {
+                var inputTitle = $('#event_title');
+                var title = inputTitle.val();
+                inputTitle.val("");
                 addEvent(title);
             });
 
@@ -829,19 +849,36 @@ var Calendar = function()
                     }
 
                 },
+                eventReceive: function(event)
+                {
+                    alert("rec");
+                    event.start = event.start.format("YYYY-MM-DD HH:mm:ss");
+                    event.end = event.end.format("YYYY-MM-DD HH:mm:ss");
+                    $.ajax({
+                        url: '/workspace/Events',
+                        data: event,
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function(response){
+                            event.id = response.success;
+                            _calendar.fullCalendar('updateEvent', event);
+                        },
+                        error: function(e){
+                            console.log(e.responseText);
+                        }
+                    });
+                    $('#calendar').fullCalendar('updateEvent',event);
+                },
                 drop: function(date, allDay)
                 {
-                    var $this = $(this),
-                        eventObject = {
-                            title: $this.text(),
-                            start: date,
-                            allDay: allDay,
-                            className: $(this).attr("data-class")
-                        };
+                    var originalEventObject = $(this).data('eventObject');
+                    var copiedEventObject = $.extend({}, originalEventObject);
+                    copiedEventObject.start = date;
+                    copiedEventObject.allDay = allDay;
+                    copiedEventObject.className = $(this).attr("data-class");
 
-                    _calendar.fullCalendar('renderEvent', eventObject, true);
-
-                    $this.remove();
+                    _calendar.fullCalendar('renderEvent', copiedEventObject, true);
+                    $(this).remove();
                 },
                 eventDrop: function(event, delta, revertFunc)
                 {
@@ -862,6 +899,7 @@ var Calendar = function()
                     };
                     NotifyServer(eventData, revertFunc);
                 }
+
             });
         }
     };

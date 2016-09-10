@@ -374,6 +374,7 @@ class WorkspaceModel extends Model
                 ['user_id'=>Auth::GetUserID(), 'event_id'=>$event_id])->RunQuery();
             if($result)
                 $this->dbLink->commit();
+            return $event_id;
         }
         return $result;
     }
