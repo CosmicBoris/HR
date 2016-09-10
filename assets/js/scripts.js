@@ -71,6 +71,7 @@ $(document).ready(function()
             }
         })
         .on('click', "#btnAdd", HandleNewEntry)
+        .on('click', "#removeEvent", HandleEventDelete)
         .on('click', "#btnAddEvent", HandleNewEvent)
         .on('click', "#btnAddUser", AddUser)
         .on('click', "#btnSaveCan", function(){
@@ -285,6 +286,9 @@ function HandleNewEntry(e)
             $(".table>tbody").html(data.table);
             $(".pull-right>.pagination").detach();
             $(".table-responsive").after(data.pagination);
+            var inputs = $("input[data-role='tagsinput']");
+            if(inputs.length > 0)
+                inputs.tagsinput('removeAll');
         } else if (!data.success) {
             $("#new_entry").find('h5').text(data.warning);
         }
@@ -316,6 +320,13 @@ function HandleNewEvent()
         alert("error");
     });
 }
+
+function HandleEventDelete()
+{
+    $("#show_entry").removeClass('open');
+    Calendar.deleteEvent();
+}
+
 function Login()
 {
     if(!$("#pblogin").hasClass('open') || $(".lg-buttons").hasClass('inactive')) {return;}
@@ -648,7 +659,7 @@ function deleteAllCookies()
 
 var Calendar = function()
 {
-    var _calendar, _paper_info, cWidth = 0;
+    var _calendar, _paper_info, _event, cWidth = 0;
     var NotifyServer = function(data, undoFn)
     {
         $.ajax({
@@ -704,10 +715,23 @@ var Calendar = function()
 
         openInfo();
     };
+    var RemoveEvent = function(data){
+        if(data.success == 1)
+            _calendar.fullCalendar( 'removeEvents', _event.id);
+        var els = $("#interCount");
+        els.text(parseInt(els.text()) - 1);
+    };
 
     return {
         init: function() {
             Calendar.initCalendar();
+        },
+        deleteEvent: function() {
+            var url = '/workspace/DeleteEvent?id='+_event.id;
+            GetJsonResponse(url, RemoveEvent);
+        },
+        getSelectedEvent: function(){
+            return _event;
         },
         initCalendar: function() {
             if (!jQuery().fullCalendar) {
@@ -778,6 +802,7 @@ var Calendar = function()
                 droppable: true,
                 eventClick: function(event, jsEvent, view)
                 {
+                    _event = event;
                     var str = "";
                     for (var key in event) {
                         var value = event[key];
