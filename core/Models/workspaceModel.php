@@ -115,6 +115,23 @@ class WorkspaceModel extends Model
 
         return $candidates;
     }
+
+    function getEventsBy($id, $field) : array
+    {
+        $events = [];
+        $result = $this->dbLink->select('events', '*')
+            ->where([$field => $id] )
+            ->RunQuery();
+
+        if ($result !== false) {
+            while ($obj = $result->fetch_assoc()) {
+                $event = new Event($obj);
+                $events[]= $event;
+            }
+        }
+        return $events;
+    }
+
     function FindCandidate(Candidate $c)
     {
         $sql = 'SELECT '.$this->dbLink->GetSafeStr(array_keys(get_object_vars($c))).' FROM `candidates` '

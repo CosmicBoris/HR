@@ -645,6 +645,12 @@ h4.header {
 .row.spacer ~ .spacer{
     margin-top: 10px;
 }
+
+.row .info-list{
+    border-bottom: 1px solid #afafaf;
+    width: 99%;
+}
+
 .text-centred{
     text-align: center;
 }

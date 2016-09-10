@@ -88,6 +88,7 @@ class WorkspaceController extends Controller
     {
         $this->_view->candidate = $this->_model->getCandidate($_GET['id']);
         $this->_view->assignedVacancies = $this->_model->GetAssignedVacancies($_GET['id']);
+        $this->_view->events = $this->_model->getEventsBy($_GET['id'], 'candidate_id');
 
         $this->_view->render();
     }
@@ -157,6 +158,7 @@ class WorkspaceController extends Controller
     {
         $this->_view->vacancy = $this->_model->getVacancy($_GET['id']);
         $this->_view->assignedCandidates = $this->_model->GetAssignedCandidates($_GET['id']);
+        $this->_view->events = $this->_model->getEventsBy($_GET['id'], 'vacancy_id');
         $this->_view->render();
     }
     public function actionVacancies()

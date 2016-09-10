@@ -77,13 +77,21 @@
 <?php
                     foreach ($this->assignedVacancies as $vacancy):
 ?>
-                        <li><ul>
-                            <li><?=$vacancy->title?></li>
-                            <li><?=$vacancy->description?></li>
-                            <li><?=$vacancy->date_added?></li>
-                            <li><?=$vacancy->assigned?></li>
-                            <li><?=$vacancy->state ? "Yes" : "No"?></li>
-                        </ul></li>
+                        <div class="member-details">
+                            <h4>Title: <?=$vacancy->title?></h4>
+                            <div class="row info-list">
+                                <div class="col-sm-4">
+                                    <?=$vacancy->date_added?>
+                                </div>
+                                <div class="col-sm-4">
+
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-sm-12">
+                                    <?=$vacancy->description?>
+                                </div>
+                            </div>
+                        </div>
 <?php
                     endforeach;
 ?>
@@ -101,7 +109,29 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="scroll" data-height="220">
-                    date_added
+                    <ul>
+                        <?php
+                        foreach ($this->events as $e):
+                            ?>
+                            <div class="member-details">
+                                <h4>Title: <?=$e->title?></h4>
+                                <div class="row info-list">
+                                    <div class="col-sm-4">
+                                        Added: <?=$e->created?>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        Event type: <?=$e->event_type?>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <div class="col-sm-12">
+                                        <?=$e->description?>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php
+                        endforeach;
+                        ?>
+                    </ul>
                 </div>
             </div>
         </div>
