@@ -115,4 +115,11 @@
 <script>
     document.title = "Candidates";
     InitTagsInput();
+    $(".datetime").datetimepicker({
+        format: "dd MM yyyy",
+        startView: 4,
+        minView: 2,
+        autoclose: true,
+        todayBtn: false
+    });
 </script>

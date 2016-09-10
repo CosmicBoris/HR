@@ -273,7 +273,7 @@ function HandlePhotoUpload(e)
 function HandleNewEntry(e)
 {
     var formObj = $('#form_new_entry');
-
+    loadingScreen(true);
     $.ajax({
         type: 'POST',
         url: formObj.attr('action'),
@@ -290,6 +290,8 @@ function HandleNewEntry(e)
         }
     }).fail( function() {
         alert("error");
+    }).always(function(){
+        loadingScreen(false);
     });
 }
 function HandleNewEvent()
