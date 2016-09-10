@@ -667,7 +667,7 @@ var Calendar = function()
             url: '/workspace/UpdateEvent',
             data: data
         }).done( function(responce){
-            if(responce.success == 1) {
+            if(responce.success) {
 
             } else if (!responce.success) {
                 undoFn();
@@ -678,6 +678,28 @@ var Calendar = function()
             alert("Server error, can`t save changes");
         });
     };
+
+    var SendEvent = function(event)
+    {
+        $.ajax({
+            type: 'POST',
+            url: '/workspace/Events',
+            data: {
+                title: event.title,
+                start: event.start
+            }
+        }).done( function(responce){
+            if(responce.success) {
+                event.id = response.success;
+                _calendar.fullCalendar('updateEvent', event);
+            } else if (!responce.success) {
+                alert("Not add");
+            }
+        }).fail( function() {
+            alert("Server error, can`t save changes");
+        });
+    };
+
     var openInfo = function()
     {
         _paper_info.addClass('open');
@@ -740,34 +762,9 @@ var Calendar = function()
             _calendar = $('#fullcalendar');
             _paper_info = $("#show_entry");
 
-            /*var initDrag = function(el)
-            {
-                var eventObject = {
-                    title: $.trim($(this).text()), // use the element's text as the event title
-                    stick: true // maintain when user navigates (see docs on the renderEvent method)
-                };
-                el.data('event', eventObject);
-                el.draggable({
-                    zIndex: 999,
-                    revert: true,
-                    revertDuration: 0
-                });
-            };
-            var addEvent = function(title) {
-                title = title.length === 0 ? "Untitled Event" : title;
-                var html = $('<div class="external-event" data-class="event-meeting">' + title + '</div>');
-                $('#event_box').append(html);
-                initDrag(html);
-            };
-            $('#event_add').off('click').click(function() {
-                var title = $('#event_title').val();
-                addEvent(title);
-            });*/
-
-
             var initDrag = function(el) {
                 var eventObject = {
-                    title: $.trim(el.text()) // use the element's text as the event title
+                    title: $.trim(el.text())
                 };
                 el.data('eventObject', eventObject);
                 el.draggable({
@@ -779,7 +776,7 @@ var Calendar = function()
 
             var addEvent = function(title) {
                 title = title.length === 0 ? "Untitled Event" : title;
-                var html = $('<div class="external-event label label-default" data-class="event-meeting" data-event="1" data-duration="01:00">' + title + '</div>');
+                var html = $('<div class="external-event label label-default" data-class="event-meeting" data-duration="01:00">' + title + '</div>');
                 jQuery('#event_box').append(html);
                 initDrag(html);
             };
@@ -849,26 +846,6 @@ var Calendar = function()
                     }
 
                 },
-                eventReceive: function(event)
-                {
-                    alert("rec");
-                    event.start = event.start.format("YYYY-MM-DD HH:mm:ss");
-                    event.end = event.end.format("YYYY-MM-DD HH:mm:ss");
-                    $.ajax({
-                        url: '/workspace/Events',
-                        data: event,
-                        type: 'POST',
-                        dataType: 'json',
-                        success: function(response){
-                            event.id = response.success;
-                            _calendar.fullCalendar('updateEvent', event);
-                        },
-                        error: function(e){
-                            console.log(e.responseText);
-                        }
-                    });
-                    $('#calendar').fullCalendar('updateEvent',event);
-                },
                 drop: function(date, allDay)
                 {
                     var originalEventObject = $(this).data('eventObject');
@@ -879,6 +856,7 @@ var Calendar = function()
 
                     _calendar.fullCalendar('renderEvent', copiedEventObject, true);
                     $(this).remove();
+                    SendEvent(copiedEventObject);
                 },
                 eventDrop: function(event, delta, revertFunc)
                 {
