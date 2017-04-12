@@ -20,11 +20,11 @@ class WorkspaceController extends Controller
         $this->_model = new workspaceModel();
         paginationHelper::setCurrentPage($_GET['page'] ?? 1);
     }
+
     public function actionIndex()
     {
         $this->RedirectToAction("Events");
     }
-    
     public function actionEvents()
     {
         if($this->isPost()) {
@@ -46,6 +46,13 @@ class WorkspaceController extends Controller
             $this->_view->SetTitle('Events');
             $this->_view->render();
         }
+    }
+    public function actionUpdateEvent()
+    {
+        if($this->_model->UpdateEvent($_POST))
+            Response::ReturnJson(['success'=>1]);
+        else
+            Response::ReturnJson(['warning'=>"critical error occurred Server internal error e32f22 > Shutdown"]);
     }
     public function actionEventInterview()
     {
@@ -76,13 +83,7 @@ class WorkspaceController extends Controller
 
         Response::ReturnJson($events);
     }
-    public function actionUpdateEvent()
-    {
-        if($this->_model->UpdateEvent($_POST))
-            Response::ReturnJson(['success'=>1]);
-        else
-            Response::ReturnJson(['warning'=>"critical error occurred Server internal error e32f22 > Shutdown"]);
-    }
+
 
     public function actionCandidateInfo()
     {
@@ -149,6 +150,8 @@ class WorkspaceController extends Controller
         else
             Response::ReturnJson(['warning'=>"critical error occurred Server internal error e32f22 > Shutdown"]);
     }
+
+
     public function actionAddPhoto()
     {
         $this->_model->InsertPhoto($_POST['id'], $_POST['photo']);
@@ -207,6 +210,7 @@ class WorkspaceController extends Controller
             Response::ReturnJson($response);
         }
     }
+
     public function actionEditVacancy()
     {
         if($this->_model->UpdateVacancy(new Vacancy($_POST)))

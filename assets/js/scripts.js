@@ -5,7 +5,6 @@ var App = function(){
     
 }();
 
-
 var mouseStartX, mouseEndX, nInterval, currentRow, url, id, searchTimer, backUp;
 var needReload = false;
 $(document).ready(function()

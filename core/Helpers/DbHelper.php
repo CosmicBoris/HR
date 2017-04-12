@@ -161,7 +161,6 @@ final class DbHelper {
         }
         return $this;
     }
-
 	/**
 	 * @param array $params
 	 * @param string $comparison (=, LIKE, IS, etc...)
@@ -234,7 +233,7 @@ final class DbHelper {
 		}
 		return $result;
 	}
-	public function showSql(){
+	public function showSql() {
 		return $this->_sql;
 	}
 	public function autocommit($mode = true){

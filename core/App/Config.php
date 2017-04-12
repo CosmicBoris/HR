@@ -1,4 +1,5 @@
 <?php
+
 define('LOG_QUERY_AND_RESULT', TRUE);
 
 class Config

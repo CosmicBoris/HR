@@ -48,16 +48,28 @@ class View
         else
             $this->fullRender($layout, $view);
     }
+
+
+
+    /**
+     *  Build page including markup file(s)
+     *
+     *  @param string $layout // wraps view as _page_content
+     *  by calling include from _common_layout file;
+     *  @param string $view // - will be inserted in _common_layout
+     * */
     public function fullRender(string $layout = null, string $view = null)
     {
         if($layout) $this->_common_layout = $layout;
 
         $this->_page_content = Config::LAYOUT_DIR
-            .Router::getControllerName(Router::SHORT_NAME).'/';
-        if($view) $this->_page_content .= $view;
-        else $this->_page_content .= lcfirst(Router::getActionName(0));
-        $this->_page_content .= Config::LAYOUT_TYPE;
+            .Router::getControllerName(Router::SHORT_NAME).'/'
+            .($view ?? lcfirst(Router::getActionName(0)))
+            .Config::LAYOUT_TYPE;
 
+        if (!file_exists($this->_page_content)) {
+            exit('file: '.$this->_page_content.' not found');
+        }
         try {
             include_once Config::LAYOUT_DIR.$this->_common_layout.Config::LAYOUT_TYPE;
         }
@@ -66,8 +78,8 @@ class View
     public function partialRender(string $layout = null)
     {
         $_view = Config::LAYOUT_DIR.Router::getControllerName(0).'/'.
-            ($layout ?? lcfirst(Router::getActionName(0))).
-            "_partial".Config::LAYOUT_TYPE;
+            ($layout ?? lcfirst(Router::getActionName(0)))."_partial"
+            .Config::LAYOUT_TYPE;
 
         try {
             include_once $_view;
